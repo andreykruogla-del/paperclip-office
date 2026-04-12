@@ -5,13 +5,8 @@ import type { OperationsMapNode, OperationsRelation } from "@/types/operations-m
 // Visual tokens
 // ──────────────────────────────────────────────────────────
 
-const CORE_TEAM_ORDER = [
-  "24c80233-48c1-4d5f-814f-26b9c527e4c0", // CEO
-  "f466e6aa-1a4c-4ba7-ac9c-5578b2f91dba",  // CTO
-  "6072fbc8-59f9-4efe-b731-aab9b8c7cbed",  // Coder
-  "f4969b3d-f195-44d9-89ea-67070be67922",  // QA
-  "1d60b6e6-986b-4c44-9dd2-af1841856f17",  // Observer
-];
+// The core team display names in preferred visual order for the bounded cycle
+const CORE_TEAM_DISPLAY_NAMES = ["CEO", "CTO", "Coder", "QA", "Observer"];
 
 const AGENT_STATUS_BORDER: Record<string, string> = {
   failed: "border-red-500/70",
@@ -97,8 +92,8 @@ export default function OfficeOverview({
   if (agents.length === 0 && toolNodes.length === 0) return null;
 
   // Stabilize visual order: core team first, then others
-  const coreAgents = agents.filter((a) => CORE_TEAM_ORDER.includes(a.id));
-  const otherAgents = agents.filter((a) => !CORE_TEAM_ORDER.includes(a.id));
+  const coreAgents = agents.filter((a) => CORE_TEAM_DISPLAY_NAMES.includes(a.displayName));
+  const otherAgents = agents.filter((a) => !CORE_TEAM_DISPLAY_NAMES.includes(a.displayName));
   const orderedAgents = [...coreAgents, ...otherAgents];
 
   const isSelected = (id: string) => selectedNodeId === id;

@@ -1,116 +1,90 @@
 /**
  * Local tool / service node configuration for the operations map.
  *
- * This file defines non-agent nodes that the agent team interacts with.
- * It is a semantic placeholder layer — NOT live discovery.
+ * This file defines non-agent nodes that your agent team may interact with.
+ * It is a SEMANTIC PLACEHOLDER LAYER — not live discovery, not auto-detection.
  *
  * HOW TO USE:
- * - Add entries for tools/services you know your agents depend on
- * - Keep descriptions honest — if telemetry isn't confirmed, say so
- * - This file is safe to commit if it contains no secrets
+ * 1. Add entries for tools/services your agents depend on
+ * 2. Keep descriptions honest — if telemetry isn't confirmed, say so
+ * 3. Remove examples you don't need; add your own infrastructure nodes
  *
- * NOTE: The nodes below are based on observable container names from
- * the simfi-mebel-ai environment. They represent the known infrastructure
- * topology, not live health checks.
+ * This file is safe to commit as long as it contains no secrets.
+ *
+ * NOTE: Agent nodes are derived automatically from run data.
+ * Only define non-agent nodes here (tools, services, external APIs).
  */
 
 import type { OperationsMapNode, OperationsRelation } from "@/types/operations-map";
 
 // ──────────────────────────────────────────────────────────
-// Core agent team (references for relations only — actual
-// agent nodes come from derive-operations-map.ts via run data)
-// ──────────────────────────────────────────────────────────
-
-export const CORE_AGENT_IDS = [
-  "24c80233-48c1-4d5f-814f-26b9c527e4c0", // CEO
-  "f466e6aa-1a4c-4ba7-ac9c-5578b2f91dba",  // CTO
-  "6072fbc8-59f9-4efe-b731-aab9b8c7cbed",  // Coder
-  "f4969b3d-f195-44d9-89ea-67070be67922",  // QA
-  "1d60b6e6-986b-4c44-9dd2-af1841856f17",  // Observer
-];
-
-// ──────────────────────────────────────────────────────────
-// Tools & Services
+// Tools & Services — seed examples
+// Replace or remove these to match your environment.
 // ──────────────────────────────────────────────────────────
 
 export const TOOL_SERVICE_NODES: OperationsMapNode[] = [
+  // Example: external data collection tool
   {
-    id: "node-scraper",
+    id: "scraper",
     kind: "tool",
     category: "data_intake",
     label: "Scraper",
     status: "unknown",
-    description: "Web scraper — collects external data for agents. No live telemetry confirmed.",
-    owner: "simfi-mebel-ai",
+    description: "Collects external data. No live telemetry connected.",
   },
+
+  // Example: content/media generation service
   {
-    id: "node-media-factory",
+    id: "media-factory",
     kind: "service",
     category: "publishing",
     label: "Media Factory",
     status: "unknown",
-    description: "Media/content generation pipeline. No live telemetry confirmed.",
-    owner: "simfi-mebel-ai",
+    description: "Content or media generation pipeline. No live telemetry connected.",
   },
+
+  // Example: CMS / publishing target
   {
-    id: "node-wordpress",
+    id: "cms",
     kind: "service",
     category: "publishing",
-    label: "WordPress",
+    label: "CMS",
     status: "unknown",
-    description: "WordPress CMS — publishing target for generated content. No live telemetry confirmed.",
-    owner: "simfi-mebel-ai",
+    description: "Content management system — publishing target. No live telemetry connected.",
   },
+
+  // Example: email/communication intake
   {
-    id: "node-mail-intake",
-    kind: "service",
-    category: "data_intake",
-    label: "Mail Processor",
-    status: "unknown",
-    description: "Email intake pipeline (sales, tenders, pricing). No live telemetry confirmed.",
-    owner: "simfi-mebel-ai",
-  },
-  {
-    id: "node-chatwoot",
+    id: "mail-intake",
     kind: "service",
     category: "communication",
-    label: "Chatwoot",
+    label: "Mail Intake",
     status: "unknown",
-    description: "Customer support / communication platform. No live telemetry confirmed.",
-    owner: "simfi-mebel-ai",
+    description: "Email processing pipeline. No live telemetry connected.",
   },
+
+  // Example: LLM / compute backend
   {
-    id: "node-hermes",
-    kind: "tool",
-    category: "orchestration",
-    label: "Hermes",
-    status: "unknown",
-    description: "Hermes agent orchestrator — manages Paperclip agent scheduling and routing.",
-    owner: "simfi-mebel-ai",
-  },
-  {
-    id: "node-openai",
+    id: "llm-api",
     kind: "external",
     category: "external_api",
-    label: "OpenAI / Codex",
+    label: "LLM API",
     status: "unknown",
-    description: "External LLM API — primary compute backend for Paperclip agents. Currently rate-limited.",
-    owner: "external",
+    description: "External LLM provider — compute backend for agents. Status unknown.",
   },
 ];
 
 // ──────────────────────────────────────────────────────────
-// Relation hints
-// Light topology hints — not a full dependency graph
+// Relation hints — tool/service only
+// Agent-to-tool relations are mapped separately in derive-operations-map.ts
+// using role-based references, not hardcoded UUIDs.
 // ──────────────────────────────────────────────────────────
 
 export const TOOL_SERVICE_RELATIONS: OperationsRelation[] = [
-  { from: "6072fbc8-59f9-4efe-b731-aab9b8c7cbed", to: "node-media-factory", label: "uses" },
-  { from: "1d60b6e6-986b-4c44-9dd2-af1841856f17", to: "node-mail-intake", label: "reads from" },
-  { from: "node-media-factory", to: "node-wordpress", label: "publishes to" },
-  { from: "node-scraper", to: "node-media-factory", label: "feeds" },
-  { from: "node-mail-intake", to: "24c80233-48c1-4d5f-814f-26b9c527e4c0", label: "alerts" },
-  { from: "24c80233-48c1-4d5f-814f-26b9c527e4c0", to: "node-openai", label: "depends on" },
-  { from: "f466e6aa-1a4c-4ba7-ac9c-5578b2f91dba", to: "node-openai", label: "depends on" },
-  { from: "node-hermes", to: "24c80233-48c1-4d5f-814f-26b9c527e4c0", label: "schedules" },
+  { from: "coder", to: "media-factory", label: "uses" },
+  { from: "observer", to: "mail-intake", label: "reads from" },
+  { from: "media-factory", to: "cms", label: "publishes to" },
+  { from: "scraper", to: "media-factory", label: "feeds" },
+  { from: "ceo", to: "llm-api", label: "depends on" },
+  { from: "cto", to: "llm-api", label: "depends on" },
 ];
