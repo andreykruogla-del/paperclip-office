@@ -34,9 +34,20 @@ lerna-debug.log*
 .env*
 !.env.example
 
+# local database
+*.db
+*.db-shm
+*.db-wal
+
 # vercel
 .vercel
 
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local tool artifacts
+.qwen/
+qwen/
+*.lnk
+Критический разбор проекта/

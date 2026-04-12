@@ -68,3 +68,75 @@ Record of key architectural and product decisions with rationale.
 - **Rationale**: Focuses development effort on product value. Prevents scope creep
 - **Date**: 2026-04-10
 - **Status**: Guiding principle
+
+### 10. Operator control room, not a dashboard
+
+- **Decision**: Paperclip Office is defined as an operator control room, not a dashboard
+- **Why**:
+  - dashboards show data
+  - operators need clarity and actionability
+  - focus must be on real-time understanding and intervention
+- **Consequence**:
+  - prioritize event interpretation over visualization
+  - avoid feature creep
+  - avoid UI-first thinking
+- **Date**: 2026-04-10
+- **Status**: Guiding principle
+
+### 11. SQLite for parsed data, not reparsing on every request
+
+- **Decision**: Parse Paperclip NDJSON logs once, store in local SQLite, read from DB
+- **Why**:
+  - Reparsing 9K+ events on every page load is too slow (300s+)
+  - NDJSON logs are append-only — parse once, query many
+  - Direct SQL with `better-sqlite3` keeps it simple — no ORM, no migrations framework
+- **Consequence**:
+  - Workflow: `import:paperclip` → open app → instant response
+  - Re-import is safe (ON CONFLICT / INSERT OR IGNORE)
+  - DB file is gitignored — no shared state
+- **Date**: 2026-04-10
+- **Status**: Implemented
+
+### 12. Real agent identities grounded in remote evidence
+
+- **Decision**: Agent display names in the UI are resolved through local profile mapping grounded in real runtime evidence, not synthetic generation
+- **Why**:
+  - Operators debugging real agent systems need to see "CEO" and "Coder", not "Planner 42"
+  - Real identities (confirmed via NDJSON log evidence from remote Paperclip) improve operational clarity dramatically
+  - Deterministic fallback is fine for unknown agents, but known agents should feel real
+- **Consequence**:
+  - `src/data/agent-profiles.local.ts` is the primary source of truth for agent identity
+  - New teams require manual profile entries after inspecting their logs
+  - Unknown agents remain visible but visually subordinate to known team members
+- **Date**: 2026-04-10
+- **Status**: Implemented
+
+### 13. Polling-based refresh before true streaming
+
+- **Decision**: Use periodic polling (45s) as the bridge between static snapshots and real-time streaming
+- **Why**:
+  - Full SSE/websocket infrastructure is premature before validating operator workflows
+  - Polling is simple, reliable, and gives operators "fresh enough" data
+  - Reuses existing import pipeline — no new infrastructure needed
+  - Manual refresh (↻ button) gives explicit control when needed
+- **Consequence**:
+  - Data freshness has a delay (up to 45s)
+  - Server load from periodic Docker reads
+  - Acceptable trade-off for Phase 0 — streaming comes when we have real operator feedback
+- **Date**: 2026-04-10
+- **Status**: Implemented
+
+### 14. Paperclip Office is an operations map + run forensics product
+
+- **Decision**: The product's strongest form is a visual operations map (orientation layer) combined with deep forensic run debugging (investigation layer)
+- **Why**:
+  - Operators need both a quick team-state overview and the ability to drill into failures
+  - Neither surface alone is sufficient — the map surfaces attention, the debugger explains why
+  - This is different from a generic dashboard (which aggregates) or from Paperclip itself (which orchestrates)
+- **Consequence**:
+  - OfficeOverview is the orientation layer — must answer "who needs attention?"
+  - RunView is the debugging core — must answer "why did this fail?"
+  - Future tools/services visualization extends the operations map naturally
+  - Copilot, if built, remains assistive — it suggests, never executes
+- **Date**: 2026-04-10
+- **Status**: Guiding principle

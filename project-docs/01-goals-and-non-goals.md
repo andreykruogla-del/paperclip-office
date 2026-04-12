@@ -2,19 +2,21 @@
 
 ## Goals
 
-1. **Real-time agent visibility** — show all agents, their status (alive/idle/working/failed), and current task
-2. **Task and handoff tracking** — visualize task lifecycle and inter-agent handoffs as a readable timeline or graph
-3. **Failure detection and surfacing** — highlight errors, stuck agents, and retry loops prominently
-4. **Cost visibility** — display token usage and compute cost per agent and per task in real time
-5. **Operator intervention** — allow operators to pause, resume, reroute, or kill agents from the UI
-6. **Broad setup support** — work with local Paperclip installs, Docker-compose setups, and remote/cloud deployments
-7. **Open-source first** — fully self-hostable, no vendor lock-in for the core dashboard
+1. **Visual operations map** — show the full team state at a glance: who is active, idle, stale, or failed
+2. **Deep run investigation** — forensic inspection of individual runs with full event timelines, raw data access, and error context
+3. **Operator attention localization** — surface which agent or run needs attention first, with clear "why" information
+4. **Real agent identities** — every agent shown by its real role (CEO, CTO, Coder, QA, Observer), not generated labels
+5. **Flow awareness** — make the team's bounded cycle (CEO → CTO → Coder → QA → Observer) visually explicit
+6. **Future: tools & services map** — extend the operations map to show external dependencies, APIs, and tools as nodes
+7. **Future: operator copilot** — assistive suggestions for attention priorities and recurring failure patterns
+8. **Self-hosted, local-first** — fully self-hostable, editable profiles, no vendor lock-in
 
-## Non-Goals (for now)
+## Non-Goals
 
-1. **Replacing Paperclip** — Paperclip Office observes and controls; it does not run agents itself
-2. **Full agent orchestration** — we expose intervention points, but we don't build a competing orchestrator
-3. **Game-like simulation environments** — visual complexity for its own sake is not a goal; clarity is
-4. **Enterprise SSO/RBAC in v1** — nice to have for SaaS phase, not for OSS MVP
-5. **Long-term analytics/ML** — cost and performance analytics come in SaaS phase; we don't over-build early
-6. **Multi-tenant SaaS in OSS** — the OSS version is single-tenant/self-hosted; multi-tenancy is a SaaS concern
+1. **Not a Paperclip replacement** — we observe and debug; Paperclip remains the orchestrator and execution engine
+2. **Not a governance clone** — we don't replicate Paperclip's ticket system, issue tracker, or permission model
+3. **Not a generic dashboard** — we solve one specific problem, not every possible monitoring need
+4. **Not a game or simulation** — visual clarity over decorative complexity; operators need answers, not rooms
+5. **Not an autonomous fixing system** — we surface problems; we don't auto-remediate them
+6. **Not a metrics-first tool** — events and runs are primary; aggregated metrics are secondary
+7. **Not a multi-tenant SaaS (yet)** — the OSS version is single-tenant/self-hosted; SaaS is a future phase
