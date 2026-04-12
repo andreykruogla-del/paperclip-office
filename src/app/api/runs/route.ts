@@ -1,5 +1,17 @@
 import { NextResponse } from "next/server";
-import { initSchema, getAllRuns, getEventsForRun, getParserDebug, type DbRun } from "@/server/db";
+import { initSchema, getAllRuns, getParserDebug, type DbRun } from "@/server/db";
+
+export type RunSummary = {
+  runId: string;
+  agentId: string;
+  status: string;
+  eventCount: number;
+  durationMs: number | null;
+  totalTokens: number | null;
+  startedAt: number | null;
+  endedAt: number | null;
+  mainError: string | null;
+};
 
 export async function GET() {
   initSchema();
@@ -7,27 +19,17 @@ export async function GET() {
   const runsFromDb = getAllRuns();
   const debug = getParserDebug();
 
-  const runList = runsFromDb.map((row: DbRun) => {
-    const events = getEventsForRun(row.run_id);
-    const parsedEvents = events.map((e) => ({
-      id: e.id,
-      runId: e.run_id,
-      agentId: e.agent_id,
-      timestamp: e.timestamp,
-      eventType: e.event_type,
-      normalizedType: e.normalized_type,
-      level: e.level,
-      message: e.message,
-      tokens: e.tokens,
-      durationMs: e.duration_ms,
-      error: e.error,
-      raw: e.raw_json ? JSON.parse(e.raw_json) : undefined,
-    }));
-    return {
-      runId: row.run_id,
-      events: parsedEvents,
-    };
-  });
+  const summaries: RunSummary[] = runsFromDb.map((row: DbRun) => ({
+    runId: row.run_id,
+    agentId: row.agent_id,
+    status: row.status,
+    eventCount: row.event_count,
+    durationMs: row.duration_ms,
+    totalTokens: row.total_tokens,
+    startedAt: row.started_at,
+    endedAt: row.ended_at,
+    mainError: row.main_error,
+  }));
 
-  return NextResponse.json({ runs: runList, debug });
+  return NextResponse.json({ runs: summaries, debug });
 }

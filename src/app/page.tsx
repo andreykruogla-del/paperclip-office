@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import RunList from "@/components/RunList";
 import RunView from "@/components/RunView";
 import OfficeOverview from "@/components/OfficeOverview";
@@ -8,10 +8,12 @@ import TeamContextPanel from "@/components/TeamContextPanel";
 import AgentSummary from "@/components/AgentSummary";
 import OperationsNodeSummary from "@/components/OperationsNodeSummary";
 import { useRuns } from "@/hooks/useRuns";
+import { useRunEvents } from "@/hooks/useRunEvents";
 import { deriveOfficeAgents } from "@/lib/derive-office-agents";
 import { deriveOperationsMap } from "@/lib/derive-operations-map";
 import { getAgentProfile } from "@/lib/agent-profiles";
 import type { OperationsMapNode } from "@/types/operations-map";
+import type { LogEvent } from "@/types/events";
 
 function formatTime(d: Date): string {
   return d.toLocaleTimeString("en", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
@@ -19,8 +21,19 @@ function formatTime(d: Date): string {
 
 export default function Home() {
   const { runs, loading, debug, refreshState, refresh } = useRuns();
+  const { state: eventsState, loadEvents, clearEvents } = useRunEvents();
+  
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+
+  // Load events when a run is selected
+  useEffect(() => {
+    if (selectedRunId) {
+      loadEvents(selectedRunId);
+    } else {
+      clearEvents();
+    }
+  }, [selectedRunId, loadEvents, clearEvents]);
 
   const officeAgents = useMemo(() => deriveOfficeAgents(runs), [runs]);
   const operationsMap = useMemo(() => deriveOperationsMap(officeAgents), [officeAgents]);
@@ -43,10 +56,16 @@ export default function Home() {
     if (!selectedNodeId) return runs;
     // Only filter if selected node is an agent
     if (operationsMap.nodes.find((n) => n.id === selectedNodeId)?.kind !== "agent") return runs;
-    return runs.filter((r) => r.events[0]?.agentId === selectedNodeId);
+    return runs.filter((r) => r.agentId === selectedNodeId);
   }, [runs, selectedNodeId, operationsMap.nodes]);
 
-  const selectedRun = filteredRuns.find((r) => r.runId === selectedRunId);
+  // Get selected run events from lazy-loaded state
+  const selectedRunEvents: LogEvent[] = useMemo(() => {
+    if (eventsState.status === "success") {
+      return eventsState.events;
+    }
+    return [];
+  }, [eventsState]);
 
   const clearSelection = () => {
     setSelectedNodeId(null);
@@ -65,6 +84,7 @@ export default function Home() {
   const isRefreshing = refreshState.status === "refreshing";
   const isAgentSelected = selectedAgent !== null;
   const isToolSelected = selectedToolNode !== null;
+  const isLoadingEvents = eventsState.status === "loading";
 
   return (
     <div className="h-screen flex flex-col bg-zinc-950 text-zinc-100">
@@ -162,8 +182,18 @@ export default function Home() {
 
         {/* Run View or tool detail */}
         <main className="flex-1 bg-zinc-900 flex flex-col overflow-hidden">
-          {selectedRun && isAgentSelected ? (
-            <RunView events={selectedRun.events} />
+          {selectedRunId && isAgentSelected ? (
+            isLoadingEvents ? (
+              <div className="flex-1 flex items-center justify-center text-sm text-zinc-600">
+                Loading events…
+              </div>
+            ) : eventsState.status === "error" ? (
+              <div className="flex-1 flex items-center justify-center text-sm text-red-400">
+                {eventsState.message}
+              </div>
+            ) : (
+              <RunView events={selectedRunEvents} />
+            )
           ) : isToolSelected ? (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center text-sm text-zinc-500 max-w-md">

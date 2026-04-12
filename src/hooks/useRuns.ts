@@ -3,6 +3,18 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { LogEvent, ParserDebugInfo } from "@/types/events";
 
+export type RunSummary = {
+  runId: string;
+  agentId: string;
+  status: string;
+  eventCount: number;
+  durationMs: number | null;
+  totalTokens: number | null;
+  startedAt: number | null;
+  endedAt: number | null;
+  mainError: string | null;
+};
+
 export type RunEntry = {
   runId: string;
   events: LogEvent[];
@@ -15,7 +27,7 @@ export type RefreshState =
   | { status: "error"; message: string };
 
 export type UseRunsResult = {
-  runs: RunEntry[];
+  runs: RunSummary[];
   loading: boolean;
   debug: ParserDebugInfo | null;
   refreshState: RefreshState;
@@ -25,7 +37,7 @@ export type UseRunsResult = {
 const AUTO_REFRESH_MS = 45_000; // 45 seconds
 
 export function useRuns(): UseRunsResult {
-  const [runs, setRuns] = useState<RunEntry[]>([]);
+  const [runs, setRuns] = useState<RunSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [debug, setDebug] = useState<ParserDebugInfo | null>(null);
   const [refreshState, setRefreshState] = useState<RefreshState>({ status: "idle" });
@@ -35,10 +47,10 @@ export function useRuns(): UseRunsResult {
     try {
       const res = await fetch("/api/runs");
       const data = await res.json();
-      const sorted = (data.runs as RunEntry[]).sort((a, b) => {
-        const aLast = a.events[a.events.length - 1]?.timestamp ?? 0;
-        const bLast = b.events[b.events.length - 1]?.timestamp ?? 0;
-        return bLast - aLast;
+      const sorted = (data.runs as RunSummary[]).sort((a, b) => {
+        const aTime = a.endedAt ?? a.startedAt ?? 0;
+        const bTime = b.endedAt ?? b.startedAt ?? 0;
+        return bTime - aTime;
       });
       setRuns(sorted);
       setDebug(data.debug ?? null);

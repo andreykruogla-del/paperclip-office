@@ -1,15 +1,15 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import type { LogEvent } from "@/types/events";
-import type { RunEntry } from "@/hooks/useRuns";
+import type { RunSummary } from "@/hooks/useRuns";
 import { getAgentProfile, getAgentShortId } from "@/lib/agent-profiles";
 
 function shortId(id: string) {
   return id.substring(0, 8);
 }
 
-function formatTime(ts: number): string {
+function formatTime(ts: number | null): string {
+  if (!ts) return "";
   const d = new Date(ts);
   return d.toLocaleString("en", {
     month: "short",
@@ -19,19 +19,8 @@ function formatTime(ts: number): string {
   });
 }
 
-function getRunStatus(events: LogEvent[]): "success" | "failed" {
-  const lastResult = [...events].reverse().find(
-    (e) => e.eventType === "task_completed" || e.eventType === "task_failed"
-  );
-  return lastResult?.eventType === "task_completed" ? "success" : "failed";
-}
-
-function getDuration(events: LogEvent[]): number | null {
-  const result = events.find((e) => e.durationMs !== undefined);
-  return result?.durationMs ?? null;
-}
-
-function formatDuration(ms: number): string {
+function formatDuration(ms: number | null): string {
+  if (!ms) return "";
   if (ms < 1000) return `${ms}ms`;
   if (ms < 60000) return `${(ms / 1000).toFixed(1)}s`;
   return `${(ms / 60000).toFixed(1)}m`;
@@ -44,15 +33,14 @@ type FailureGroup = {
   runIds: string[];
 };
 
-function buildFailureGroups(runs: RunEntry[]): FailureGroup[] {
+function buildFailureGroups(runs: RunSummary[]): FailureGroup[] {
   const errorMap = new Map<string, string[]>();
   for (const run of runs) {
-    if (getRunStatus(run.events) !== "failed") continue;
-    const errorEvent = run.events.find((e) => e.eventType === "task_failed" && e.error);
-    if (errorEvent?.error) {
-      const existing = errorMap.get(errorEvent.error) ?? [];
+    if (run.status !== "failed") continue;
+    if (run.mainError) {
+      const existing = errorMap.get(run.mainError) ?? [];
       existing.push(run.runId);
-      errorMap.set(errorEvent.error, existing);
+      errorMap.set(run.mainError, existing);
     }
   }
   return Array.from(errorMap.entries())
@@ -72,7 +60,7 @@ export default function RunList({
   selectedRunId,
   onSelect,
 }: {
-  runs: RunEntry[];
+  runs: RunSummary[];
   selectedRunId: string | null;
   onSelect: (runId: string) => void;
 }) {
@@ -89,11 +77,11 @@ export default function RunList({
   const filteredRuns = useMemo(() => {
     return runs.filter((run) => {
       if (groupedRunIds.has(run.runId)) return false;
-      if (filter === "failed" && getRunStatus(run.events) !== "failed") return false;
-      if (filter === "completed" && getRunStatus(run.events) !== "success") return false;
+      if (filter === "failed" && run.status !== "failed") return false;
+      if (filter === "completed" && run.status !== "completed") return false;
       if (search) {
         const q = search.toLowerCase();
-        const agentId = run.events[0]?.agentId ?? "";
+        const agentId = run.agentId;
         const profile = getAgentProfile(agentId);
         if (
           !run.runId.toLowerCase().includes(q) &&
@@ -175,8 +163,7 @@ export default function RunList({
                     const run = runs.find((r) => r.runId === rid);
                     if (!run) return null;
                     const isSelected = rid === selectedRunId;
-                    const lastEvent = run.events[run.events.length - 1];
-                    const profile = getAgentProfile(run.events[0]?.agentId ?? "");
+                    const profile = getAgentProfile(run.agentId);
                     return (
                       <li key={rid}>
                         <button
@@ -193,11 +180,9 @@ export default function RunList({
                               {shortId(rid)}
                             </span>
                           </div>
-                          {lastEvent && (
-                            <span className="text-zinc-400 dark:text-zinc-500">
-                              {formatTime(lastEvent.timestamp)}
-                            </span>
-                          )}
+                          <span className="text-zinc-400 dark:text-zinc-500">
+                            {formatTime(run.endedAt ?? run.startedAt)}
+                          </span>
                         </button>
                       </li>
                     );
@@ -210,11 +195,9 @@ export default function RunList({
 
         {/* Individual runs */}
         {filteredRuns.map((run) => {
-          const status = getRunStatus(run.events);
-          const duration = getDuration(run.events);
-          const lastEvent = run.events[run.events.length - 1];
+          const duration = formatDuration(run.durationMs);
           const isSelected = run.runId === selectedRunId;
-          const agentId = run.events[0]?.agentId ?? "unknown";
+          const agentId = run.agentId;
           const profile = getAgentProfile(agentId);
 
           return (
@@ -231,12 +214,12 @@ export default function RunList({
                   </span>
                   <span
                     className={`shrink-0 text-xs font-medium ${
-                      status === "success"
+                      run.status === "completed"
                         ? "text-emerald-600 dark:text-emerald-400"
                         : "text-red-600 dark:text-red-400"
                     }`}
                   >
-                    {status}
+                    {run.status}
                   </span>
                 </div>
                 <div className="mt-0.5 flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-500">
@@ -251,13 +234,11 @@ export default function RunList({
                       {profile.owner}
                     </span>
                   )}
-                  {duration !== null && <span>{formatDuration(duration)}</span>}
+                  {duration && <span>{duration}</span>}
                 </div>
-                {lastEvent && (
-                  <div className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500 truncate">
-                    {formatTime(lastEvent.timestamp)}
-                  </div>
-                )}
+                <div className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500 truncate">
+                  {formatTime(run.endedAt ?? run.startedAt)}
+                </div>
               </button>
             </li>
           );
