@@ -17,9 +17,9 @@ Phase 0 (Forensic Run Viewer) is functionally complete. We are now in Phase 1, m
 
 ### Operations Map
 - **OfficeOverview** — isometric spatial view of the real 5-agent team (CEO, CTO, Coder, QA, Observer). Statuses, roles, runtime badges.
-- **Tools & Services layer** — secondary zone showing configured infrastructure nodes (Scraper, Media Factory, WordPress, Mail Processor, Chatwoot, Hermes, OpenAI/Codex). No live telemetry — semantic placeholders based on known topology.
-- **Relation hints** — light topology showing how agents and tools connect (e.g. Coder → Media Factory → WordPress).
-- **Team Context Panel** — shows team name (Simfi-Mebel-AI) and bounded cycle flow (CEO → CTO → Coder → QA → Observer).
+- **Tools & Services layer** — secondary zone with configured semantic placeholder nodes (Scraper, Media Factory, CMS, Mail Intake, LLM API). No live telemetry — these are seed examples that anyone can customize.
+- **Relation hints** — light topology hints showing how agents and tools might connect (e.g. Coder → Media Factory → CMS). Symbolic role-based relations, not environment-specific.
+- **Team Context Panel** — shows bounded cycle flow (CEO → CTO → Coder → QA → Observer) with role-based action descriptions.
 - **Agent Summary** — selected agent shows profile, status, latest error, run counts.
 - **Operations Node Summary** — selected tool/service shows label, kind, category, description, and honest "no live telemetry" notice.
 - **Auto-refresh** — 45s polling + manual refresh button (↻).

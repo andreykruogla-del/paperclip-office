@@ -27,7 +27,7 @@
 - [x] Core team stabilized in consistent visual order
 - [x] Local editable profile layer (`src/data/agent-profiles.local.ts`)
 - [x] Bounded cycle flow strip with live status dots
-- [x] Tools/services zone in operations map (Scraper, Media Factory, WordPress, Mail, Chatwoot, Hermes, OpenAI)
+- [x] Tools/services zone in operations map (seed examples: Scraper, Media Factory, CMS, Mail Intake, LLM API)
 - [x] Relation hints (agent ↔ tool topology)
 - [x] Operations node detail panel (honest "no live telemetry" notice)
 - [ ] Agent-to-agent handoff awareness between runs
