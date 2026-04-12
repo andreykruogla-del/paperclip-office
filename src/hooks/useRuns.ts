@@ -3,9 +3,15 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { LogEvent, ParserDebugInfo } from "@/types/events";
 
-export type RunEntry = {
+export type RunSummary = {
   runId: string;
-  events: LogEvent[];
+  agentId: string;
+  status: string;
+  eventCount: number;
+  durationMs: number | null;
+  totalTokens: number | null;
+  mainError: string | null;
+  endedAt: number | null;
 };
 
 export type RefreshState =
@@ -15,17 +21,17 @@ export type RefreshState =
   | { status: "error"; message: string };
 
 export type UseRunsResult = {
-  runs: RunEntry[];
+  runs: RunSummary[];
   loading: boolean;
   debug: ParserDebugInfo | null;
   refreshState: RefreshState;
   refresh: () => Promise<void>;
 };
 
-const AUTO_REFRESH_MS = 45_000; // 45 seconds
+const AUTO_REFRESH_MS = 45_000;
 
 export function useRuns(): UseRunsResult {
-  const [runs, setRuns] = useState<RunEntry[]>([]);
+  const [runs, setRuns] = useState<RunSummary[]>([]);
   const [loading, setLoading] = useState(true);
   const [debug, setDebug] = useState<ParserDebugInfo | null>(null);
   const [refreshState, setRefreshState] = useState<RefreshState>({ status: "idle" });
@@ -35,11 +41,7 @@ export function useRuns(): UseRunsResult {
     try {
       const res = await fetch("/api/runs");
       const data = await res.json();
-      const sorted = (data.runs as RunEntry[]).sort((a, b) => {
-        const aLast = a.events[a.events.length - 1]?.timestamp ?? 0;
-        const bLast = b.events[b.events.length - 1]?.timestamp ?? 0;
-        return bLast - aLast;
-      });
+      const sorted = (data.runs as RunSummary[]).sort((a, b) => (b.endedAt ?? 0) - (a.endedAt ?? 0));
       setRuns(sorted);
       setDebug(data.debug ?? null);
       if (!loading) {
@@ -93,4 +95,48 @@ export function useRuns(): UseRunsResult {
   }, [fetchRuns]);
 
   return { runs, loading, debug, refreshState, refresh };
+}
+
+/**
+ * Lazy-load events for a single run.
+ * Only fetches when called — not on mount.
+ */
+export function useRunEvents(runId: string | null) {
+  const [events, setEvents] = useState<LogEvent[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!runId) {
+      setEvents([]);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    fetch(`/api/runs/${encodeURIComponent(runId)}/events`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!cancelled) {
+          setEvents(data.events ?? []);
+          setLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Failed to load events");
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [runId]);
+
+  return { events, loading, error };
 }

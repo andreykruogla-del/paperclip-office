@@ -1,4 +1,4 @@
-import type { RunEntry } from "@/hooks/useRuns";
+import type { RunSummary } from "@/hooks/useRuns";
 import type { AgentProfile } from "@/types/agents";
 import { getAgentProfile } from "@/lib/agent-profiles";
 
@@ -30,7 +30,11 @@ function timeAgoLabel(ms: number): string {
   return `${days}d ago`;
 }
 
-export function deriveOfficeAgents(runs: RunEntry[]): OfficeAgent[] {
+/**
+ * Derive agent summaries from run summaries only.
+ * No full events needed — summaries contain status, agentId, error, timestamps.
+ */
+export function deriveOfficeAgents(runs: RunSummary[]): OfficeAgent[] {
   const agentMap = new Map<string, {
     lastSeen: number;
     latestRunId: string;
@@ -41,15 +45,13 @@ export function deriveOfficeAgents(runs: RunEntry[]): OfficeAgent[] {
   }>();
 
   for (const run of runs) {
-    const agentId = run.events[0]?.agentId;
+    const agentId = run.agentId;
     if (!agentId) continue;
 
-    const lastEvent = run.events[run.events.length - 1];
-    const timestamp = lastEvent?.timestamp ?? 0;
-
-    const isFailed = run.events.some((e) => e.normalizedType === "result_error");
+    const timestamp = run.endedAt ?? 0;
+    const isFailed = run.status === "failed";
     const runStatus: "completed" | "failed" = isFailed ? "failed" : "completed";
-    const errorEvent = run.events.find((e) => e.eventType === "task_failed" && e.error);
+    const mainError = run.mainError ?? null;
 
     const existing = agentMap.get(agentId);
     if (!existing || timestamp > existing.lastSeen) {
@@ -57,7 +59,7 @@ export function deriveOfficeAgents(runs: RunEntry[]): OfficeAgent[] {
         lastSeen: timestamp,
         latestRunId: run.runId,
         latestRunStatus: runStatus,
-        latestError: errorEvent?.error ?? existing?.latestError ?? null,
+        latestError: mainError ?? existing?.latestError ?? null,
         runCount: (existing?.runCount ?? 0) + 1,
         failedRunCount: (existing?.failedRunCount ?? 0) + (isFailed ? 1 : 0),
       });

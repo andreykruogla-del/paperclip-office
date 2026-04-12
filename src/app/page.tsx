@@ -7,11 +7,12 @@ import OfficeOverview from "@/components/OfficeOverview";
 import TeamContextPanel from "@/components/TeamContextPanel";
 import AgentSummary from "@/components/AgentSummary";
 import OperationsNodeSummary from "@/components/OperationsNodeSummary";
-import { useRuns } from "@/hooks/useRuns";
+import { useRuns, useRunEvents } from "@/hooks/useRuns";
 import { deriveOfficeAgents } from "@/lib/derive-office-agents";
 import { deriveOperationsMap } from "@/lib/derive-operations-map";
 import { getAgentProfile } from "@/lib/agent-profiles";
 import type { OperationsMapNode } from "@/types/operations-map";
+import type { LogEvent } from "@/types/events";
 
 function formatTime(d: Date): string {
   return d.toLocaleTimeString("en", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
@@ -22,8 +23,12 @@ export default function Home() {
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
+  // Derive agents from summaries only — no events loaded
   const officeAgents = useMemo(() => deriveOfficeAgents(runs), [runs]);
   const operationsMap = useMemo(() => deriveOperationsMap(officeAgents), [officeAgents]);
+
+  // Lazy-load events only when a run is selected
+  const { events: selectedRunEvents, loading: eventsLoading, error: eventsError } = useRunEvents(selectedRunId);
 
   // Find selected node
   const selectedAgent = useMemo(
@@ -38,15 +43,16 @@ export default function Home() {
     [operationsMap.nodes, selectedNodeId]
   );
 
-  // Filter runs by selected agent
+  // Filter runs by selected agent (summaries only)
   const filteredRuns = useMemo(() => {
     if (!selectedNodeId) return runs;
-    // Only filter if selected node is an agent
     if (operationsMap.nodes.find((n) => n.id === selectedNodeId)?.kind !== "agent") return runs;
-    return runs.filter((r) => r.events[0]?.agentId === selectedNodeId);
+    return runs.filter((r) => r.agentId === selectedNodeId);
   }, [runs, selectedNodeId, operationsMap.nodes]);
 
-  const selectedRun = filteredRuns.find((r) => r.runId === selectedRunId);
+  const isRefreshing = refreshState.status === "refreshing";
+  const isAgentSelected = selectedAgent !== null;
+  const isToolSelected = selectedToolNode !== null;
 
   const clearSelection = () => {
     setSelectedNodeId(null);
@@ -62,9 +68,12 @@ export default function Home() {
     }
   };
 
-  const isRefreshing = refreshState.status === "refreshing";
-  const isAgentSelected = selectedAgent !== null;
-  const isToolSelected = selectedToolNode !== null;
+  const handleSelectRun = (runId: string) => {
+    setSelectedRunId(runId);
+  };
+
+  // Build a minimal RunEntry-like object for RunView from lazy-loaded events
+  const runViewEvents: LogEvent[] = selectedRunEvents;
 
   return (
     <div className="h-screen flex flex-col bg-zinc-950 text-zinc-100">
@@ -153,17 +162,31 @@ export default function Home() {
                 <RunList
                   runs={filteredRuns}
                   selectedRunId={selectedRunId}
-                  onSelect={setSelectedRunId}
+                  onSelect={handleSelectRun}
                 />
               </div>
             )}
           </aside>
         )}
 
-        {/* Run View or tool detail */}
+        {/* Run View */}
         <main className="flex-1 bg-zinc-900 flex flex-col overflow-hidden">
-          {selectedRun && isAgentSelected ? (
-            <RunView events={selectedRun.events} />
+          {selectedRunId ? (
+            eventsLoading ? (
+              <div className="flex-1 flex items-center justify-center text-sm text-zinc-600">
+                Loading events…
+              </div>
+            ) : eventsError ? (
+              <div className="flex-1 flex items-center justify-center text-sm text-red-400">
+                Failed to load events: {eventsError}
+              </div>
+            ) : runViewEvents.length > 0 ? (
+              <RunView events={runViewEvents} />
+            ) : (
+              <div className="flex-1 flex items-center justify-center text-sm text-zinc-600">
+                No events found for this run
+              </div>
+            )
           ) : isToolSelected ? (
             <div className="flex-1 flex items-center justify-center">
               <div className="text-center text-sm text-zinc-500 max-w-md">
