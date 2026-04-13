@@ -7,7 +7,6 @@ export async function GET() {
   const runsFromDb = getAllRuns();
   const debug = getParserDebug();
 
-  // Only summaries — no events loaded
   const runList = runsFromDb.map((row) => ({
     runId: row.run_id,
     agentId: row.agent_id,
@@ -16,6 +15,7 @@ export async function GET() {
     durationMs: row.duration_ms,
     totalTokens: row.total_tokens,
     mainError: row.main_error,
+    startedAt: row.started_at,
     endedAt: row.ended_at,
   }));
 

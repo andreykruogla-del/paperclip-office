@@ -19,6 +19,7 @@ function makeSummary(overrides: Partial<RunSummary>): RunSummary {
     durationMs: 10000,
     totalTokens: 50000,
     mainError: null,
+    startedAt: null,
     endedAt: oneHourAgo,
     ...overrides,
   };

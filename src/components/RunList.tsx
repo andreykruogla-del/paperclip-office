@@ -180,7 +180,7 @@ export default function RunList({
                             </span>
                           </div>
                           <span className="text-zinc-400 dark:text-zinc-500">
-                            {formatTime(run.endedAt)}
+                            {formatTime(run.endedAt ?? run.startedAt)}
                           </span>
                         </button>
                       </li>
@@ -234,7 +234,7 @@ export default function RunList({
                   {run.durationMs !== null && <span>{formatDuration(run.durationMs)}</span>}
                 </div>
                 <div className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500 truncate">
-                  {formatTime(run.endedAt)}
+                  {formatTime(run.endedAt ?? run.startedAt)}
                 </div>
               </button>
             </li>

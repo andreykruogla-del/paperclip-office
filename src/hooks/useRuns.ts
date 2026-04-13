@@ -11,6 +11,7 @@ export type RunSummary = {
   durationMs: number | null;
   totalTokens: number | null;
   mainError: string | null;
+  startedAt: number | null;
   endedAt: number | null;
 };
 
@@ -81,7 +82,8 @@ export function useRuns(): UseRunsResult {
         }
         return;
       }
-      const sorted = result.data.runs.sort((a, b) => (b.endedAt ?? 0) - (a.endedAt ?? 0));
+      const timeAnchor = (r: RunSummary) => r.endedAt ?? r.startedAt ?? 0;
+      const sorted = result.data.runs.sort((a, b) => timeAnchor(b) - timeAnchor(a));
       setRuns(sorted);
       setDebug(result.data.debug ?? null);
       if (!loading) {

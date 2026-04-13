@@ -48,7 +48,7 @@ export function deriveOfficeAgents(runs: RunSummary[]): OfficeAgent[] {
     const agentId = run.agentId;
     if (!agentId) continue;
 
-    const timestamp = run.endedAt ?? 0;
+    const timestamp = run.endedAt ?? run.startedAt ?? 0;
     const isFailed = run.status === "failed";
     const runStatus: "completed" | "failed" = isFailed ? "failed" : "completed";
     const mainError = run.mainError ?? null;
