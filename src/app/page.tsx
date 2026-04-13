@@ -64,7 +64,16 @@ export default function Home() {
       clearSelection();
     } else {
       setSelectedNodeId(nodeId);
-      setSelectedRunId(null);
+      // Auto-select run: first failed, otherwise most recent
+      const isAgent = operationsMap.nodes.find((n) => n.id === nodeId)?.kind === "agent";
+      if (isAgent) {
+        const agentRuns = runs.filter((r) => r.agentId === nodeId);
+        const failedRun = agentRuns.find((r) => r.status === "failed");
+        const mostRecent = agentRuns.length > 0 ? agentRuns[0] : null;
+        setSelectedRunId(failedRun?.runId ?? mostRecent?.runId ?? null);
+      } else {
+        setSelectedRunId(null);
+      }
     }
   };
 
