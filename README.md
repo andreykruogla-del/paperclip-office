@@ -35,18 +35,31 @@ Agent identities are local-first and editable: you define who your agents are in
 
 ## Quick Start
 
+### Option A: Demo with sample data (no Paperclip needed)
+
 ```bash
 # 1. Install dependencies
 npm install
 
-# 2. Import Paperclip logs (requires a local Docker Paperclip instance)
-npm run import:paperclip
+# 2. Load sample demo data
+npm run import:sample
 
 # 3. Start the app
 npm run dev
 ```
 
-Open `http://localhost:3000` to see the operations map.
+Open `http://localhost:3000` to see the operations map with realistic sample data.
+
+### Option B: Connect to a real Paperclip instance
+
+```bash
+npm install
+
+# Import logs from a local Docker Paperclip instance
+npm run import:paperclip
+
+npm run dev
+```
 
 ## How It Works
 
