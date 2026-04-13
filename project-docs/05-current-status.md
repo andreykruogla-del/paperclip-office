@@ -14,6 +14,7 @@ Phase 0 (Forensic Run Viewer) is functionally complete. We are now in Phase 1, m
 - **Run Debugger (RunView)** — full event timeline, raw data inspection, error display. Working against real remote Paperclip data.
 - **RunList** — filtering, search, failure grouping. Operators can find problematic runs quickly.
 - **SQLite persistence** — NDJSON parsed once, stored locally, read instantly.
+- **Runs/events separation** — run summaries load independently; events are fetched on-demand when a run is opened. Keeps payload lightweight and forensic flow scalable.
 
 ### Operations Map
 - **OfficeOverview** — isometric spatial view of the real 5-agent team (CEO, CTO, Coder, QA, Observer). Statuses, roles, runtime badges.

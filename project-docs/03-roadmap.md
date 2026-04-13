@@ -30,6 +30,7 @@
 - [x] Tools/services zone in operations map (seed examples: Scraper, Media Factory, CMS, Mail Intake, LLM API)
 - [x] Relation hints (agent ↔ tool topology)
 - [x] Operations node detail panel (honest "no live telemetry" notice)
+- [x] Runs/events separation — summaries load independently, events lazy-loaded on demand
 - [ ] Agent-to-agent handoff awareness between runs
 - [ ] First production deployment for real operator access
 
