@@ -1,10 +1,22 @@
-# 06 — Positioning and Distribution
+# 07 — Positioning and Distribution
 
 ## What Paperclip Office Is
 
 Paperclip Office is a visual operations map and forensic run debugger for Paperclip multi-agent teams.
 
 It is an **observer and investigator**, not an orchestrator. It helps operators understand team state and investigate failures — it does not run agents, schedule tasks, or manage permissions.
+
+## Current Publication Stance
+
+The product is now in **Publication Readiness** phase:
+
+- README publication pass completed
+- Core product features (operations map + run forensics) are implemented
+- Agent identities are real and editable
+- Tools/services layer exists as honest placeholders
+- No return to long internal polishing cycles
+
+The next meaningful step is external feedback, not more internal engineering.
 
 ## What Paperclip Office Is Not
 

@@ -9,7 +9,7 @@
 - [x] SQLite persistence (parse once, read fast)
 - [x] RunList with filtering, search, and failure grouping
 - [x] RunView with full event timeline, raw data access, error display
-- [x] Real agent identities confirmed and applied (Simfi-Mebel-AI: CEO, CTO, Coder, QA, Observer)
+- [x] Real agent identities confirmed and applied (CEO, CTO, Coder, QA, Observer)
 - [x] Auto-refresh (45s polling) + manual refresh control
 - [x] Orphaned/unknown agents handled with lower visual priority
 

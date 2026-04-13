@@ -21,7 +21,7 @@ It has two core layers:
 - **Operations Map (OfficeOverview)** — spatial orientation layer showing agent identities, statuses, and roles. Answers "who should I look at?"
 - **Run Debugger (RunView)** — detailed event timeline for a single run. Answers "why did this fail?"
 
-Agent identity is first-class: every agent has a display name, role, and runtime — editable locally in `src/data/agent-profiles.local.ts`. Real production identities (e.g. Simfi-Mebel-AI: CEO, CTO, Coder, QA, Observer) have been confirmed via NDJSON log evidence and applied.
+Agent identity is first-class: every agent has a display name, role, and runtime — editable locally in `src/data/agent-profiles.local.ts`. Real production identities have been confirmed via NDJSON log evidence and applied (e.g. CEO, CTO, Coder, QA, Observer).
 
 ## Future Direction
 

@@ -4,9 +4,14 @@
 
 ## Product Phase
 
-**Phase 1 — Operations Map** (transitioning from Phase 0)
+**Publication Readiness**
 
-Phase 0 (Forensic Run Viewer) is functionally complete. We are now in Phase 1, making the operations map the primary daily surface for operators.
+Phase 0 (Forensic Run Viewer) is functionally complete. Phase 1 (Operations Map) is implemented with core features. README publication pass is done. The product is now ready for a first external showing.
+
+Remaining focus is publication-oriented:
+- First external feedback from operators who actually use Paperclip
+- Production deployment for real access
+- No return to long internal polishing cycles
 
 ## What Is Working
 
@@ -40,17 +45,17 @@ Phase 0 (Forensic Run Viewer) is functionally complete. We are now in Phase 1, m
 
 ## What's Next (Priority Order)
 
-1. **Production deployment** — host on a subdomain for real operator access
-2. **First operator usage loop** — watch how the team actually uses the debugger + operations map
-3. **True streaming ingest** — only after we validate the polling-based workflow
-4. **Live tool/service telemetry** — health checks for non-agent nodes
+1. **First external showing** — get the tool in front of someone who actually runs Paperclip agents
+2. **Production deployment** — host on a subdomain for real operator access
+3. **Feedback-driven iteration** — fix what operators actually need, not what we imagine they might want
+4. **True streaming ingest** — only after polling-based workflow is validated with real usage
 
 ## Local Paperclip Environment
 
-- **Remote server**: `simfi-mebel-ai` at `5.129.223.47`
+- **Remote server**: Paperclip instance on remote host (SSH accessible)
 - **Paperclip**: `paperclip-paperclip-1` (healthy), port 3110
 - **Database**: `paperclip-paperclip-db-1` (PostgreSQL 17)
-- **Confirmed team**: CEO, CTO, Coder, QA, Observer (5 agents, 144 NDJSON run files)
+- **Confirmed team**: CEO, CTO, Coder, QA, Observer (5 agents)
 - **All agents currently failed**: ChatGPT Codex credits exhausted (April 2026)
 
 > **To edit agent profiles:** open `src/data/agent-profiles.local.ts`
