@@ -111,7 +111,7 @@ const RUN_SCENARIOS: { agentKey: keyof typeof AGENTS; events: EventDef[] }[] = [
     agentKey: "CEO",
     events: [
       { type: "activity", message: "Reviewing Observer summary from previous cycle", delay: 0 },
-      { type: "activity", message: "Identifying blocker: Coder API usage limit", delay: 15 },
+      { type: "activity", message: "Identifying blocker: Coder API unavailable", delay: 15 },
       { type: "activity", message: "Requesting Owner approval to retry with alternative approach", delay: 35 },
       { type: "result_error", message: "Authorization timeout waiting for Owner response.", delay: 120, error: "Authorization timeout, please restart the process.", durationMs: 120000, tokens: 22000 },
     ],
