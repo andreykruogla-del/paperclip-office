@@ -6,13 +6,13 @@ Visual operations map and forensic run debugger for Paperclip teams.
 
 ## What It Is
 
-Paperclip Office is a local-first operator surface for real Paperclip multi-agent systems. It gives you:
+Paperclip Office is a local-first operator surface for Paperclip multi-agent systems. It gives operators:
 
-- **Operations map** — a spatial view of your team: who is active, idle, stale, or failed
-- **Run forensics** — deep investigation of individual runs with full event timelines and raw data access
-- **Flow awareness** — visibility into how work is supposed to move through your team
+- **An operations map** — a spatial view of the team: who is active, idle, stale, or failed
+- **Run forensics** — deep investigation of individual runs with full event timelines, raw data, and error context
+- **Flow awareness** — visibility into how work is supposed to move through the team
 
-It complements Paperclip. It does not replace Paperclip.
+It **complements** Paperclip. It does not replace it.
 
 ## Why It Exists
 
@@ -24,44 +24,14 @@ Paperclip Office turns those logs into:
 - a fast way to drill into any failed run and see exactly why it broke
 - a structured understanding of agent identities, roles, and handoff flow
 
-## Current Product Shape
+## What You'll See
 
-### What already works
+After launching the app, you get two main surfaces:
 
-| Area | Status |
-|---|---|
-| NDJSON log parser for Paperclip run-logs | ✅ |
-| Event normalization and type mapping | ✅ |
-| SQLite persistence (parse once, read fast) | ✅ |
-| RunList with filtering, search, failure grouping | ✅ |
-| RunView — full event timeline, raw data, errors | ✅ |
-| OfficeOverview — spatial team view with statuses | ✅ |
-| Tools/services zone in operations map | ✅ |
-| Relation hints (agent ↔ tool topology) | ✅ |
-| Real agent identities (CEO, CTO, Coder, QA, Observer) | ✅ |
-| Local editable profile layer | ✅ |
-| Auto-refresh (45s polling) + manual refresh | ✅ |
-| Bounded cycle flow visualization | ✅ |
+- **Operations Map** — a spatial overview showing agents as stations with live statuses, plus a secondary zone for tools and services your agents may depend on
+- **Run Inspector** — click any run to see a full event timeline with raw data access, error messages, and token usage
 
-### What is intentionally not built yet
-
-| Area | Reason |
-|---|---|
-| True streaming (SSE/webhook) | Polling is sufficient until we have real operator feedback |
-| Live tool/service telemetry | Phase 3 — semantic placeholders first, health checks later |
-| Operator copilot | Phase 4 — need validated workflows before assistive AI |
-| Multi-team support | Phase 5 — single-team is enough for validation |
-| Auth / production deployment | Needed before real operator access, premature during development |
-
-## How It Works
-
-1. **Import** — Paperclip NDJSON run-logs are parsed once and stored in local SQLite
-2. **Inspect** — Operations map shows team state; RunView shows individual run timelines
-3. **Refresh** — Auto-refresh pulls latest data every 45s; manual refresh (↻) available on demand
-
-```
-Paperclip NDJSON logs → Parser → SQLite → Operations Map + Run Debugger
-```
+Agent identities are local-first and editable: you define who your agents are in a simple config file. Seed examples are included for common role patterns (CEO, CTO, Coder, QA, Observer).
 
 ## Quick Start
 
@@ -69,7 +39,7 @@ Paperclip NDJSON logs → Parser → SQLite → Operations Map + Run Debugger
 # 1. Install dependencies
 npm install
 
-# 2. Import Paperclip logs (requires local Docker Paperclip instance)
+# 2. Import Paperclip logs (requires a local Docker Paperclip instance)
 npm run import:paperclip
 
 # 3. Start the app
@@ -78,23 +48,44 @@ npm run dev
 
 Open `http://localhost:3000` to see the operations map.
 
-## Agent Profiles
+## How It Works
 
-Agent identities are defined in `src/data/agent-profiles.local.ts`. The file includes confirmed profiles for the Simfi-Mebel-AI team and can be extended for any Paperclip setup.
-
-```ts
-export const LOCAL_AGENT_PROFILES = {
-  "your-agent-uuid": {
-    displayName: "Agent Name",
-    role: "orchestration",
-    runtime: "paperclip",
-    description: "What this agent does",
-    owner: "your-team",
-  },
-};
+```
+Paperclip NDJSON logs → Parser → SQLite → Operations Map + Run Debugger
 ```
 
+1. **Import** — NDJSON run-logs are parsed once and stored in local SQLite
+2. **Inspect** — Operations map shows team state; Run Inspector shows individual run timelines
+3. **Refresh** — Auto-refresh polls for new data every 45s; manual refresh available on demand
+
+## What Already Works
+
+| Area | Status |
+|---|---|
+| NDJSON log parser for Paperclip run-logs | ✅ |
+| Event normalization and type mapping | ✅ |
+| SQLite persistence | ✅ |
+| Operations map with agent statuses | ✅ |
+| Tools/services contextual layer | ✅ |
+| Run inspection with full timeline + raw data | ✅ |
+| Agent identity layer (local editable profiles) | ✅ |
+| Auto-refresh + manual refresh | ✅ |
+| Unit tests on core derivation logic | ✅ |
+
+## Current Limitations
+
+| Area | Status |
+|---|---|
+| Streaming (SSE/webhook) | Polling-based refresh for now |
+| Tool/service telemetry | Semantic placeholders — no live health checks |
+| Multi-team support | Single team per instance |
+| Auth / production hosting | Not yet |
+
+These are intentional trade-offs for an MVP-first approach, not missing features.
+
 ## Project Docs
+
+For deeper technical details, see the project documentation:
 
 | Doc | Purpose |
 |---|---|
@@ -103,7 +94,6 @@ export const LOCAL_AGENT_PROFILES = {
 | [03 — Roadmap](project-docs/03-roadmap.md) | Phase-by-phase plan |
 | [04 — Decisions Log](project-docs/04-decisions-log.md) | Key architectural and product decisions |
 | [05 — Current Status](project-docs/05-current-status.md) | What works now, what's deferred, what's next |
-| [06 — Event Schema v0](project-docs/06-event-schema-v0.md) | Event model for Paperclip run-logs |
 | [07 — Positioning & Distribution](project-docs/07-positioning-and-distribution.md) | Product boundary and future distribution path |
 
 ## Tech Stack
@@ -112,6 +102,7 @@ export const LOCAL_AGENT_PROFILES = {
 - TypeScript
 - Tailwind CSS v4
 - better-sqlite3 (local persistence)
+- Vitest (unit tests)
 
 ## License
 
