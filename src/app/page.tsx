@@ -130,7 +130,7 @@ export default function Home() {
       </header>
 
       {/* Operations Map — orientation layer */}
-      <div className="px-4 py-3 border-b border-zinc-800 bg-zinc-900/50 shrink-0">
+      <div className="max-h-64 overflow-y-auto px-4 py-3 border-b border-zinc-800 bg-zinc-900/50">
         {loading ? (
           <div className="h-32 flex items-center justify-center text-sm text-zinc-600">
             Loading agents…
