@@ -105,10 +105,10 @@ export default function RunView({
 
         <div className="mt-1 flex items-center gap-3 text-xs text-zinc-500 dark:text-zinc-400">
           <span>{events.length} events</span>
-          {resultEvent?.durationMs !== undefined && (
+          {resultEvent?.durationMs != null && (
             <span>{formatDuration(resultEvent.durationMs)}</span>
           )}
-          {resultEvent?.tokens !== undefined && (
+          {resultEvent?.tokens != null && (
             <span>{resultEvent.tokens.toLocaleString()} tokens</span>
           )}
         </div>
