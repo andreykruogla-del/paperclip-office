@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { OfficeAgent } from "@/lib/derive-office-agents";
 import type { OperationsMapNode, OperationsRelation } from "@/types/operations-map";
 
@@ -91,10 +92,20 @@ export default function OfficeOverview({
 }) {
   if (agents.length === 0 && toolNodes.length === 0) return null;
 
+  // Operator mode toggle
+  const [mode, setMode] = useState<"attention" | "all">("attention");
+
   // Stabilize visual order: core team first, then others
   const coreAgents = agents.filter((a) => CORE_TEAM_DISPLAY_NAMES.includes(a.displayName));
   const otherAgents = agents.filter((a) => !CORE_TEAM_DISPLAY_NAMES.includes(a.displayName));
   const orderedAgents = [...coreAgents, ...otherAgents];
+
+  // Filter by attention mode
+  const visibleAgents = mode === "attention"
+    ? orderedAgents.filter((a) => a.status === "failed" || a.status === "stale")
+    : orderedAgents;
+
+  const attentionCount = orderedAgents.filter((a) => a.status === "failed" || a.status === "stale").length;
 
   const isSelected = (id: string) => selectedNodeId === id;
 
@@ -119,11 +130,33 @@ export default function OfficeOverview({
 
           {/* AGENT ZONE — primary */}
           <div className="relative">
-            <div className="text-xs text-zinc-600 uppercase tracking-wider mb-3 font-medium">
-              Agents
+            {/* Mode toggle */}
+            <div className="flex items-center gap-2 mb-3">
+              <div className="flex bg-zinc-800/60 rounded-md overflow-hidden border border-zinc-700/30">
+                <button
+                  onClick={() => setMode("attention")}
+                  className={`px-2.5 py-1 text-xs font-medium transition-colors ${
+                    mode === "attention"
+                      ? "bg-zinc-700 text-zinc-100"
+                      : "text-zinc-500 hover:text-zinc-300"
+                  }`}
+                >
+                  Attention{attentionCount > 0 && <span className="ml-1 text-red-400">({attentionCount})</span>}
+                </button>
+                <button
+                  onClick={() => setMode("all")}
+                  className={`px-2.5 py-1 text-xs font-medium transition-colors ${
+                    mode === "all"
+                      ? "bg-zinc-700 text-zinc-100"
+                      : "text-zinc-500 hover:text-zinc-300"
+                  }`}
+                >
+                  All ({orderedAgents.length})
+                </button>
+              </div>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-              {orderedAgents.map((agent) => {
+              {visibleAgents.map((agent) => {
                 const sel = isSelected(agent.id);
                 return (
                   <button
@@ -181,6 +214,13 @@ export default function OfficeOverview({
                 );
               })}
             </div>
+
+            {/* Empty state for attention mode */}
+            {visibleAgents.length === 0 && mode === "attention" && (
+              <div className="py-8 text-center text-sm text-zinc-500">
+                No agents need attention right now
+              </div>
+            )}
           </div>
 
           {/* TOOL/SERVICE ZONE — secondary */}
