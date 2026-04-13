@@ -84,7 +84,7 @@ const RUN_SCENARIOS: { agentKey: keyof typeof AGENTS; events: EventDef[] }[] = [
       { type: "activity", message: "Reading context bundle and project files", delay: 0 },
       { type: "activity", message: "Processing implementation task from CTO handoff", delay: 30 },
       { type: "activity", message: "Executing bounded implementation scope", delay: 90 },
-      { type: "result_error", message: "You've hit your usage limit. Upgrade to Pro or try again at Apr 8th, 2026.", delay: 180, error: "You've hit your usage limit. Upgrade to Pro (https://chatgpt.com/explore/pro), visit https://chatgpt.com/codex/settings/usage to purchase more credits or try again at Apr 8th, 2026 7:45 AM.", durationMs: 180000, tokens: 1200000 },
+      { type: "result_error", message: "API rate limit exceeded. Retry required after credential refresh.", delay: 180, error: "API rate limit exceeded. Service temporarily unavailable.", durationMs: 180000, tokens: 1200000 },
     ],
   },
   // QA — failed (no Coder result to verify)
@@ -103,7 +103,7 @@ const RUN_SCENARIOS: { agentKey: keyof typeof AGENTS; events: EventDef[] }[] = [
       { type: "activity", message: "Collecting team state snapshot", delay: 0 },
       { type: "activity", message: "CEO: running, CTO: completed, Coder: failed, QA: failed", delay: 15 },
       { type: "activity", message: "Generating operational summary for CEO", delay: 40 },
-      { type: "result_success", message: "Summary: cycle partially completed. Blocker: Coder API limit. Next action: CEO needs Owner attention.", delay: 65, durationMs: 65000, tokens: 32000 },
+      { type: "result_success", message: "Summary: cycle partially completed. Blocker: Coder API unavailable. Next action: CEO needs Owner attention.", delay: 65, durationMs: 65000, tokens: 32000 },
     ],
   },
   // CEO — second attempt, failed
