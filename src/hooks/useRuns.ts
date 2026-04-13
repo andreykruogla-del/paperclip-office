@@ -30,6 +30,41 @@ export type UseRunsResult = {
 
 const AUTO_REFRESH_MS = 45_000;
 
+// ─── Small safe-fetch helper ──────────────────────────────
+
+type FetchResult<T> =
+  | { ok: true; data: T }
+  | { ok: false; error: string; status?: number };
+
+/**
+ * Fetch + parse JSON safely.
+ * Checks response.ok, handles HTTP errors with status codes,
+ * and catches JSON parse failures with a clear message.
+ */
+async function safeFetch<T>(url: string, init?: RequestInit): Promise<FetchResult<T>> {
+  try {
+    const res = await fetch(url, init);
+    if (!res.ok) {
+      return { ok: false, error: `HTTP ${res.status}`, status: res.status };
+    }
+    const text = await res.text();
+    let json: unknown;
+    try {
+      json = JSON.parse(text);
+    } catch {
+      return { ok: false, error: "Invalid server response" };
+    }
+    return { ok: true, data: json as T };
+  } catch (err) {
+    return {
+      ok: false,
+      error: err instanceof Error ? err.message : "Network error",
+    };
+  }
+}
+
+// ─── useRuns ──────────────────────────────────────────────
+
 export function useRuns(): UseRunsResult {
   const [runs, setRuns] = useState<RunSummary[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,17 +74,22 @@ export function useRuns(): UseRunsResult {
 
   const fetchRuns = useCallback(async () => {
     try {
-      const res = await fetch("/api/runs");
-      const data = await res.json();
-      const sorted = (data.runs as RunSummary[]).sort((a, b) => (b.endedAt ?? 0) - (a.endedAt ?? 0));
+      const result = await safeFetch<{ runs: RunSummary[]; debug: ParserDebugInfo }>("/api/runs");
+      if (!result.ok) {
+        if (!loading) {
+          setRefreshState({ status: "error", message: `Failed to load runs: ${result.error}` });
+        }
+        return;
+      }
+      const sorted = result.data.runs.sort((a, b) => (b.endedAt ?? 0) - (a.endedAt ?? 0));
       setRuns(sorted);
-      setDebug(data.debug ?? null);
+      setDebug(result.data.debug ?? null);
       if (!loading) {
         setRefreshState({ status: "success", at: new Date() });
       }
     } catch {
       if (!loading) {
-        setRefreshState({ status: "error", message: "Failed to fetch runs" });
+        setRefreshState({ status: "error", message: "Unexpected error loading runs" });
       }
     } finally {
       setLoading(false);
@@ -62,22 +102,28 @@ export function useRuns(): UseRunsResult {
     setRefreshState({ status: "refreshing" });
 
     try {
-      const res = await fetch("/api/refresh", { method: "POST" });
-      const data = await res.json();
+      const result = await safeFetch<{ success: boolean; error?: string }>("/api/refresh", {
+        method: "POST",
+      });
 
-      if (data.success) {
+      if (!result.ok) {
+        setRefreshState({
+          status: "error",
+          message: result.status === 409 ? "Refresh already in progress" : `Refresh failed: ${result.error}`,
+        });
+        return;
+      }
+
+      if (result.data.success) {
         await fetchRuns();
       } else {
         setRefreshState({
           status: "error",
-          message: data.error ?? "Refresh failed",
+          message: result.data.error ?? "Refresh failed",
         });
       }
-    } catch (err) {
-      setRefreshState({
-        status: "error",
-        message: err instanceof Error ? err.message : "Refresh failed",
-      });
+    } catch {
+      setRefreshState({ status: "error", message: "Unexpected error during refresh" });
     } finally {
       refreshing.current = false;
     }
@@ -97,10 +143,8 @@ export function useRuns(): UseRunsResult {
   return { runs, loading, debug, refreshState, refresh };
 }
 
-/**
- * Lazy-load events for a single run.
- * Only fetches when called — not on mount.
- */
+// ─── useRunEvents ─────────────────────────────────────────
+
 export function useRunEvents(runId: string | null) {
   const [events, setEvents] = useState<LogEvent[]>([]);
   const [loading, setLoading] = useState(false);
@@ -118,17 +162,23 @@ export function useRunEvents(runId: string | null) {
     setLoading(true);
     setError(null);
 
-    fetch(`/api/runs/${encodeURIComponent(runId)}/events`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (!cancelled) {
-          setEvents(data.events ?? []);
+    safeFetch<{ events: LogEvent[] }>(`/api/runs/${encodeURIComponent(runId)}/events`)
+      .then((result) => {
+        if (cancelled) return;
+        if (!result.ok) {
+          const msg = result.status === 404
+            ? "Run not found"
+            : `Failed to load events (${result.error})`;
+          setError(msg);
           setLoading(false);
+          return;
         }
+        setEvents(result.data.events ?? []);
+        setLoading(false);
       })
-      .catch((err) => {
+      .catch(() => {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Failed to load events");
+          setError("Unexpected error loading events");
           setLoading(false);
         }
       });
