@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import type { OfficeAgent } from "@/lib/derive-office-agents";
 import type { OperationsMapNode, OperationsRelation } from "@/types/operations-map";
 
@@ -92,20 +92,27 @@ export default function OfficeOverview({
 }) {
   if (agents.length === 0 && toolNodes.length === 0) return null;
 
-  // Operator mode toggle
-  const [mode, setMode] = useState<"attention" | "all">("attention");
-
   // Stabilize visual order: core team first, then others
-  const coreAgents = agents.filter((a) => CORE_TEAM_DISPLAY_NAMES.includes(a.displayName));
-  const otherAgents = agents.filter((a) => !CORE_TEAM_DISPLAY_NAMES.includes(a.displayName));
+  const coreAgents = agents.filter((a: OfficeAgent) => CORE_TEAM_DISPLAY_NAMES.includes(a.displayName));
+  const otherAgents = agents.filter((a: OfficeAgent) => !CORE_TEAM_DISPLAY_NAMES.includes(a.displayName));
   const orderedAgents = [...coreAgents, ...otherAgents];
 
-  // Filter by attention mode
-  const visibleAgents = mode === "attention"
-    ? orderedAgents.filter((a) => a.status === "failed" || a.status === "stale")
-    : orderedAgents;
+  // Status tabs with counts
+  const counts = {
+    all: orderedAgents.length,
+    failed: orderedAgents.filter((a: OfficeAgent) => a.status === "failed").length,
+    stale: orderedAgents.filter((a: OfficeAgent) => a.status === "stale").length,
+    active: orderedAgents.filter((a: OfficeAgent) => a.status === "active").length,
+    idle: orderedAgents.filter((a: OfficeAgent) => a.status === "idle").length,
+  };
 
-  const attentionCount = orderedAgents.filter((a) => a.status === "failed" || a.status === "stale").length;
+  const [tab, setTab] = useState<"all" | "failed" | "stale" | "active" | "idle">(
+    counts.failed > 0 ? "failed" : "all"
+  );
+
+  const visibleAgents = tab === "all"
+    ? orderedAgents
+    : orderedAgents.filter((a: OfficeAgent) => a.status === tab);
 
   const isSelected = (id: string) => selectedNodeId === id;
 
@@ -130,33 +137,26 @@ export default function OfficeOverview({
 
           {/* AGENT ZONE — primary */}
           <div className="relative">
-            {/* Mode toggle */}
+            {/* Status tabs */}
             <div className="flex items-center gap-2 mb-3">
               <div className="flex bg-zinc-800/60 rounded-md overflow-hidden border border-zinc-700/30">
-                <button
-                  onClick={() => setMode("attention")}
-                  className={`px-2.5 py-1 text-xs font-medium transition-colors ${
-                    mode === "attention"
-                      ? "bg-zinc-700 text-zinc-100"
-                      : "text-zinc-500 hover:text-zinc-300"
-                  }`}
-                >
-                  Attention{attentionCount > 0 && <span className="ml-1 text-red-400">({attentionCount})</span>}
-                </button>
-                <button
-                  onClick={() => setMode("all")}
-                  className={`px-2.5 py-1 text-xs font-medium transition-colors ${
-                    mode === "all"
-                      ? "bg-zinc-700 text-zinc-100"
-                      : "text-zinc-500 hover:text-zinc-300"
-                  }`}
-                >
-                  All ({orderedAgents.length})
-                </button>
+                {(["all", "failed", "stale", "active", "idle"] as const).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setTab(t)}
+                    className={`px-2 py-1 text-xs font-medium transition-colors capitalize ${
+                      tab === t
+                        ? "bg-zinc-700 text-zinc-100"
+                        : "text-zinc-500 hover:text-zinc-300"
+                    }`}
+                  >
+                    {t}{counts[t] > 0 && <span className="ml-0.5 text-zinc-400">({counts[t]})</span>}
+                  </button>
+                ))}
               </div>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-              {visibleAgents.map((agent) => {
+              {visibleAgents.map((agent: OfficeAgent) => {
                 const sel = isSelected(agent.id);
                 return (
                   <button
@@ -215,10 +215,10 @@ export default function OfficeOverview({
               })}
             </div>
 
-            {/* Empty state for attention mode */}
-            {visibleAgents.length === 0 && mode === "attention" && (
+            {/* Empty state for filtered mode */}
+            {visibleAgents.length === 0 && tab !== "all" && (
               <div className="py-8 text-center text-sm text-zinc-500">
-                No agents need attention right now
+                No {tab} agents
               </div>
             )}
           </div>
@@ -279,7 +279,7 @@ export default function OfficeOverview({
       {/* Flow strip — bounded cycle path */}
       <div className="mt-4 flex items-center justify-center gap-1 text-xs">
         {(["CEO", "CTO", "Coder", "QA", "Observer"] as const).map((role, i) => {
-          const roleAgent = orderedAgents.find((a) => a.displayName === role);
+          const roleAgent = orderedAgents.find((a: OfficeAgent) => a.displayName === role);
           const status = roleAgent?.status ?? "unknown";
           const dotColor = status === "failed" ? "bg-red-400"
             : status === "active" ? "bg-emerald-400"
