@@ -162,10 +162,10 @@ export default function RunView({
                 </p>
               )}
 
-              {(ev.durationMs !== undefined || ev.tokens !== undefined) && (
+              {(ev.durationMs != null || ev.tokens != null) && (
                 <div className="mt-1 flex gap-3 text-xs text-zinc-400 dark:text-zinc-500">
-                  {ev.durationMs !== undefined && <span>{ev.durationMs}ms</span>}
-                  {ev.tokens !== undefined && <span>{ev.tokens.toLocaleString()} tokens</span>}
+                  {ev.durationMs != null && <span>{ev.durationMs}ms</span>}
+                  {ev.tokens != null && <span>{ev.tokens.toLocaleString()} tokens</span>}
                 </div>
               )}
 

@@ -101,11 +101,11 @@ export default function OfficeOverview({
   return (
     <div className="relative">
       {/* Floor perspective container */}
-      <div className="relative overflow-hidden rounded-xl" style={{ perspective: "1400px" }}>
+      <div className="relative overflow-hidden rounded-xl" style={{ perspective: "2000px" }}>
         {/* Floor surface */}
         <div
           className="relative bg-zinc-900/80 border border-zinc-800/50 rounded-xl p-6"
-          style={{ transform: "rotateX(8deg) rotateZ(-3deg)", transformOrigin: "center center" }}
+          style={{ transform: "rotateX(3deg)", transformOrigin: "center center" }}
         >
           {/* Subtle grid pattern */}
           <div
