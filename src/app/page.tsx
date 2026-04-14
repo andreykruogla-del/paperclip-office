@@ -129,33 +129,37 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Operations Map — orientation layer */}
-      <div className="max-h-64 overflow-y-auto px-4 py-3 border-b border-zinc-800 bg-zinc-900/50">
-        {loading ? (
-          <div className="h-32 flex items-center justify-center text-sm text-zinc-600">
-            Loading agents…
+      {/* 50/50 split: map + investigation */}
+      <div className="flex flex-1 min-h-0 overflow-hidden">
+        {/* Top half: Operations Map */}
+        <div className="flex-1 min-h-0 flex flex-col border-b border-zinc-800">
+          {/* Map content */}
+          <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3 bg-zinc-900/50">
+            {loading ? (
+              <div className="h-32 flex items-center justify-center text-sm text-zinc-600">
+                Loading agents…
+              </div>
+            ) : (
+              <OfficeOverview
+                agents={officeAgents}
+                selectedNodeId={selectedNodeId}
+                onSelectNode={handleSelectNode}
+                toolNodes={operationsMap.nodes.filter((n) => n.kind !== "agent")}
+                relations={operationsMap.relations}
+              />
+            )}
           </div>
-        ) : (
-          <OfficeOverview
-            agents={officeAgents}
-            selectedNodeId={selectedNodeId}
-            onSelectNode={handleSelectNode}
-            toolNodes={operationsMap.nodes.filter((n) => n.kind !== "agent")}
-            relations={operationsMap.relations}
-          />
-        )}
-      </div>
+          {/* Selected node summary strip */}
+          {selectedAgent && (
+            <AgentSummary agent={selectedAgent} onClear={clearSelection} />
+          )}
+          {isToolSelected && selectedToolNode && (
+            <OperationsNodeSummary node={selectedToolNode} onClear={clearSelection} />
+          )}
+        </div>
 
-      {/* Selected node summary strip */}
-      {selectedAgent && (
-        <AgentSummary agent={selectedAgent} onClear={clearSelection} />
-      )}
-      {isToolSelected && selectedToolNode && (
-        <OperationsNodeSummary node={selectedToolNode} onClear={clearSelection} />
-      )}
-
-      {/* Investigation area */}
-      <div className="flex flex-1 overflow-hidden">
+        {/* Bottom half: Investigation area */}
+        <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
         {/* Run List — only visible for agent selection */}
         {isAgentSelected && (
           <aside className="w-72 border-r border-zinc-800 bg-zinc-900 flex flex-col overflow-hidden">
@@ -220,6 +224,7 @@ export default function Home() {
             </div>
           )}
         </main>
+        </div>
       </div>
     </div>
   );
