@@ -103,7 +103,7 @@ These are intentional trade-offs for an MVP-first approach, not missing features
 
 ## Where This Is Going
 
-Paperclip Office is building toward:
+Paperclip Office is exploring:
 
 - **Handoff-aware investigation** — seeing not just a failed run, but the chain of work handoff between agents
 - **Cross-run failure correlation** — understanding when a failure is part of a recurring pattern, not a one-off

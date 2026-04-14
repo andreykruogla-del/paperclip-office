@@ -39,8 +39,6 @@ These are the next practical improvements, not distant ideas.
 - [ ] **Recurring failure grouping** — understanding when a failure is a pattern, not a one-off
 - [ ] **Incident/evidence packet** — assembling a failed run, related runs, involved agents, and raw evidence into an exportable investigation packet (markdown/JSON)
 - [ ] **Better operator attention model** — surfacing what needs attention first when the map has 50+ agents
-- [ ] **Live tool/service telemetry** — moving from semantic placeholders to actual health signals
-- [ ] **First production deployment** — hosting for real operator access and external feedback
 
 ---
 
@@ -51,9 +49,10 @@ These are the next practical improvements, not distant ideas.
 These are acknowledged future directions, not current commitments.
 
 - [ ] **Failure propagation view** — showing where the circuit broke and what downstream effects followed across agents and services
-- [ ] **Tool/service evidence model** — distinguishing agent fault vs external system fault
+- [ ] **Tool/service evidence model** — distinguishing agent fault vs external system fault, moving from placeholders to health signals
 - [ ] **Cross-run pattern intelligence** — grouping related failures, identifying systemic issues
 - [ ] **Richer ingest/correlation pipeline** — handoff detection, tool/service event linking, evidence confidence scoring
+- [ ] **Production deployment** — hosting for real operator access and external feedback
 - [ ] **Advisory copilot layer** — summaries, likely root-cause hints, suggested next checks (assistive only, never autonomous)
 
 ---
