@@ -31,6 +31,11 @@
 - [x] Relation hints (agent ↔ tool topology)
 - [x] Operations node detail panel (honest "no live telemetry" notice)
 - [x] Runs/events separation — summaries load independently, events lazy-loaded on demand
+- [x] Status tabs (All/Failed/Stale/Active/Idle) with counts
+- [x] 50/50 vertical split: map + investigation baseline
+- [x] Honest short-ID fallback for unknown agents (no fake names)
+- [x] Unmapped hints + copyable UUID for live agent mapping
+- [x] Auto-select run on agent click (failed first, then most recent)
 - [ ] Agent-to-agent handoff awareness between runs
 - [ ] First production deployment for real operator access
 

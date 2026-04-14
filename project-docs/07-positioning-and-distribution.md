@@ -6,17 +6,17 @@ Paperclip Office is a visual operations map and forensic run debugger for Paperc
 
 It is an **observer and investigator**, not an orchestrator. It helps operators understand team state and investigate failures — it does not run agents, schedule tasks, or manage permissions.
 
-## Current Publication Stance
+## Current Stance
 
-The product is now in **Publication Readiness** phase:
+The product operates in **Live Data Usability** phase:
 
-- README publication pass completed
-- Core product features (operations map + run forensics) are implemented
-- Agent identities are real and editable
-- Tools/services layer exists as honest placeholders
-- No return to long internal polishing cycles
+- Live Paperclip ingest works on real large datasets
+- Operations map + forensic debugging are the core surfaces
+- Identity mapping for unknown agents is honest (short UUID, not fake names)
+- Manual live agent mapping via local profiles is the practical workflow
+- Vertical split layout (map/investigation) is the current operator baseline
 
-The next meaningful step is external feedback, not more internal engineering.
+External value now depends on operator readability and investigation usefulness, not just on ingestion success.
 
 ## What Paperclip Office Is Not
 
@@ -24,6 +24,7 @@ The next meaningful step is external feedback, not more internal engineering.
 - Not a governance or control-plane clone
 - Not a generic dashboard for all monitoring needs
 - Not an autonomous agent system
+- Not a fake identity generator — unknown agents are shown honestly
 
 ## How It Complements Paperclip
 

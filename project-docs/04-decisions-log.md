@@ -140,3 +140,31 @@ Record of key architectural and product decisions with rationale.
   - Copilot, if built, remains assistive — it suggests, never executes
 - **Date**: 2026-04-10
 - **Status**: Guiding principle
+
+### 15. Reject fake generated agent names, use honest short-ID fallback
+
+- **Decision**: Unknown agents show as `Agent abc12345` (short UUID), not fake generated names like "Executor 14" or "Planner 42"
+- **Why**:
+  - Fake names look like real agents but are meaningless — they confuse operators
+  - Short UUID is honest, referenceable, and consistent
+  - Operators can recognize unknowns and decide whether to map them
+- **Consequence**:
+  - Unknown agents are clearly labeled as `(unmapped)`
+  - Clickable short ID copies full UUID for profile mapping
+  - Manual mapping via `src/data/agent-profiles.local.ts` is the practical workflow
+- **Date**: 2026-04-10
+- **Status**: Implemented
+
+### 16. 50/50 vertical split as main screen baseline
+
+- **Decision**: Operations map and investigation area each get ~50% of viewport height, with internal scroll for overflow
+- **Why**:
+  - Previous layout let map grow unbounded and collapse investigation area
+  - Fixed-height map (`max-h-64`) made map too narrow and lost value
+  - 50/50 split keeps both surfaces visible and usable on any tab
+- **Consequence**:
+  - Map section has internal scroll for large agent counts
+  - Investigation area always has sufficient space
+  - Neither section can steal height from the other
+- **Date**: 2026-04-10
+- **Status**: Implemented
