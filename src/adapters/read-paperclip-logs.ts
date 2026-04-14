@@ -15,89 +15,92 @@ type DropReason = "no_chunk" | "bad_chunk" | "skip_plain_text" | "no_mapping" | 
  * and sample format (single JSON object).
  */
 export function readPaperclipLogs(): LogAnalysis {
-  const output = execSync(
-    `docker exec paperclip-paperclip-1 sh -lc "find ${LOG_BASE} -type f -name '*.ndjson' | sort | while read f; do echo FILE:"$f"; cat "$f"; done"`,
-    { encoding: "utf-8", maxBuffer: 500 * 1024 * 1024 }
+  // Step 1: Get the list of NDJSON files
+  const fileList = execSync(
+    `docker exec paperclip-paperclip-1 sh -lc "find ${LOG_BASE} -type f -name '*.ndjson' | sort"`,
+    { encoding: "utf-8" }
   );
+  const files = fileList.trim().split("\n").filter(Boolean);
 
+  // Step 2: Read each file individually (avoids shell variable escaping issues on Linux)
   const events: LogEvent[] = [];
   const runs = new Map<string, LogEvent[]>();
   let linesRead = 0;
   let eventsParsed = 0;
   const dropReasons = new Map<string, number>();
 
-  let currentFilePath = "";
+  for (const filePath of files) {
+    const { agentId, runId } = parsePath(filePath);
+    const content = execSync(
+      `docker exec paperclip-paperclip-1 cat '${filePath}'`,
+      { encoding: "utf-8", maxBuffer: 100 * 1024 * 1024 }
+    );
 
-  for (const line of output.split("\n")) {
-    if (line.startsWith("FILE:")) {
-      currentFilePath = line.slice(5);
-      continue;
-    }
-    if (!currentFilePath || !line.trim()) continue;
+    for (const line of content.split("\n")) {
+      if (!line.trim()) continue;
+      linesRead++;
 
-    linesRead++;
-    const { agentId, runId } = parsePath(currentFilePath);
+      try {
+        const entry = JSON.parse(line);
+        const ts = entry.ts;
+        const chunkStr = entry.chunk;
 
-    try {
-      const entry = JSON.parse(line);
-      const ts = entry.ts;
-      const chunkStr = entry.chunk;
-
-      if (!chunkStr || typeof chunkStr !== "string") {
-        dropReasons.set("no_chunk", (dropReasons.get("no_chunk") || 0) + 1);
-        continue;
-      }
-
-      // Decode the chunk string
-      const decoded = JSON.parse(chunkStr) as unknown;
-
-      // Case 1: decoded is already a JSON object (sample format)
-      if (typeof decoded === "object" && decoded !== null && !Array.isArray(decoded)) {
-        const event = makeEvent(decoded as Record<string, unknown>, ts, agentId, runId);
-        if (event) {
-          events.push(event);
-          eventsParsed++;
-          if (!runs.has(runId)) runs.set(runId, []);
-          runs.get(runId)!.push(event);
-        } else {
-          dropReasons.set("no_mapping", (dropReasons.get("no_mapping") || 0) + 1);
-        }
-        continue;
-      }
-
-      // Case 2: decoded is a string containing multiple JSON objects (real Paperclip format)
-      if (typeof decoded === "string") {
-        // Skip plain text log lines like "[paperclip] Skipping saved session..."
-        if (!decoded.startsWith("{")) {
-          dropReasons.set("skip_plain_text", (dropReasons.get("skip_plain_text") || 0) + 1);
+        if (!chunkStr || typeof chunkStr !== "string") {
+          dropReasons.set("no_chunk", (dropReasons.get("no_chunk") || 0) + 1);
           continue;
         }
 
-        // Split by \n and parse each JSON object
-        const subLines = decoded.split("\n");
-        for (const subLine of subLines) {
-          if (!subLine.trim()) continue;
-          try {
-            const obj = JSON.parse(subLine) as Record<string, unknown>;
-            const event = makeEvent(obj, ts, agentId, runId);
-            if (event) {
-              events.push(event);
-              eventsParsed++;
-              if (!runs.has(runId)) runs.set(runId, []);
-              runs.get(runId)!.push(event);
-            } else {
-              dropReasons.set("no_mapping", (dropReasons.get("no_mapping") || 0) + 1);
-            }
-          } catch {
-            dropReasons.set("bad_json", (dropReasons.get("bad_json") || 0) + 1);
-          }
-        }
-        continue;
-      }
+        // Decode the chunk string
+        const decoded = JSON.parse(chunkStr) as unknown;
 
-      dropReasons.set("bad_chunk", (dropReasons.get("bad_chunk") || 0) + 1);
-    } catch {
-      dropReasons.set("bad_chunk", (dropReasons.get("bad_chunk") || 0) + 1);
+        // Case 1: decoded is already a JSON object (sample format)
+        if (typeof decoded === "object" && decoded !== null && !Array.isArray(decoded)) {
+          const event = makeEvent(decoded as Record<string, unknown>, ts, agentId, runId);
+          if (event) {
+            events.push(event);
+            eventsParsed++;
+            if (!runs.has(runId)) runs.set(runId, []);
+            runs.get(runId)!.push(event);
+          } else {
+            dropReasons.set("no_mapping", (dropReasons.get("no_mapping") || 0) + 1);
+          }
+          continue;
+        }
+
+        // Case 2: decoded is a string containing multiple JSON objects (real Paperclip format)
+        if (typeof decoded === "string") {
+          // Skip plain text log lines like "[paperclip] Skipping saved session..."
+          if (!decoded.startsWith("{")) {
+            dropReasons.set("skip_plain_text", (dropReasons.get("skip_plain_text") || 0) + 1);
+            continue;
+          }
+
+          // Split by \n and parse each JSON object
+          const subLines = decoded.split("\n");
+          for (const subLine of subLines) {
+            if (!subLine.trim()) continue;
+            try {
+              const obj = JSON.parse(subLine) as Record<string, unknown>;
+              const event = makeEvent(obj, ts, agentId, runId);
+              if (event) {
+                events.push(event);
+                eventsParsed++;
+                if (!runs.has(runId)) runs.set(runId, []);
+                runs.get(runId)!.push(event);
+              } else {
+                dropReasons.set("no_mapping", (dropReasons.get("no_mapping") || 0) + 1);
+              }
+            } catch {
+              dropReasons.set("bad_json", (dropReasons.get("bad_json") || 0) + 1);
+            }
+          }
+          continue;
+        }
+
+        dropReasons.set("bad_chunk", (dropReasons.get("bad_chunk") || 0) + 1);
+      } catch {
+        dropReasons.set("bad_chunk", (dropReasons.get("bad_chunk") || 0) + 1);
+      }
     }
   }
 
@@ -151,7 +154,7 @@ function makeEvent(
     const itemType = item.type as string | undefined;
     if (itemType === "agent_message") {
       return {
-        id: (typeof item?.id === "string" && item.id) || `${runId}-${ts}`,
+        id: (typeof item.id === "string" && item.id) || `${runId}-${ts}`,
         timestamp: new Date(ts).getTime(),
         agentId,
         runId,
@@ -162,17 +165,17 @@ function makeEvent(
       };
     }
     if (itemType === "command_execution") {
-      const exitCode = item?.exit_code as number | null;
+      const exitCode = item.exit_code as number | null;
       if (exitCode !== null && exitCode !== 0) {
         return {
-          id: (typeof item?.id === "string" && item.id) || `${runId}-${ts}`,
+          id: (typeof item.id === "string" && item.id) || `${runId}-${ts}`,
           timestamp: new Date(ts).getTime(),
           agentId,
           runId,
           eventType: "agent_activity",
           normalizedType: "activity",
           level: "warning",
-          message: `Command exited ${exitCode}: ${item?.command ?? "unknown"}`,
+          message: `Command exited ${exitCode}: ${item.command ?? "unknown"}`,
         };
       }
       // Successful commands — skip to avoid noise
