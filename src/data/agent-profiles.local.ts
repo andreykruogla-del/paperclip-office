@@ -1,27 +1,23 @@
 /**
  * Local editable agent profile overrides.
  *
- * This is the PRIMARY place to define real agent identities.
+ * This is the PRIMARY place to map live agent UUIDs to readable profiles.
  *
- * How to use:
- * 1. Find the real agent UUID (from Paperclip, Docker, or Paperclip Office logs)
- * 2. Add an entry below with displayName, role, runtime, etc.
- * 3. The UI will immediately reflect the change - no rebuild needed
+ * HOW TO MAP A LIVE AGENT:
+ * 1. Run the app and find an unknown agent card (e.g. "Agent abc12345")
+ * 2. Click that agent to open RunView → the full UUID appears in the summary header
+ * 3. Copy the UUID and add an entry below
+ * 4. The UI updates immediately (no restart needed)
  *
- * Priority: local overrides > deterministic fallback
- *
- * To find agent IDs:
- * - Check Paperclip Office RunList (shows real UUIDs)
- * - Check Paperclip dashboard at http://localhost:3110
- * - Check Docker: docker exec paperclip-paperclip-1 "ls companies"
+ * Priority: this file > fallback ("Agent abc12345")
  */
 
 import type { AgentProfile } from "@/types/agents";
 
 export const LOCAL_AGENT_PROFILES: Record<string, Omit<AgentProfile, "agentId">> = {
+
   // ──────────────────────────────────────────────────────────
-  // Simfi-Mebel-AI (SIMA) — confirmed remote production team
-  // Source: NDJSON run-log evidence from remote Paperclip instance
+  // KNOWN AGENTS — confirmed from live data
   // ──────────────────────────────────────────────────────────
 
   "24c80233-48c1-4d5f-814f-26b9c527e4c0": {
@@ -65,23 +61,17 @@ export const LOCAL_AGENT_PROFILES: Record<string, Omit<AgentProfile, "agentId">>
   },
 
   // ──────────────────────────────────────────────────────────
-  // Orphaned agents — low confidence, unknown roles.
-  // Keep them visible but subordinate.
+  // ADD YOUR LIVE AGENTS BELOW
   // ──────────────────────────────────────────────────────────
+  // Copy this template and fill in your real agent UUID:
+  //
+  //   "<full-uuid-here>": {
+  //     displayName: "ShortName",
+  //     role: "orchestration | implementation | verification | monitoring | unknown",
+  //     runtime: "paperclip",
+  //     description: "What this agent does",
+  //     owner: "your-team",
+  //   },
+  //
 
-  "d99f231e-b447-49bf-a801-1fce9a14d17e": {
-    displayName: "Agent D99",
-    role: "unknown",
-    runtime: "paperclip",
-    description: "Orphaned agent — 1 run found, role not confirmed",
-    owner: "simfi-mebel-ai",
-  },
-
-  "ba87913f-78f7-4c48-ac5f-70c34e4eedd3": {
-    displayName: "Agent BA8",
-    role: "unknown",
-    runtime: "paperclip",
-    description: "Orphaned agent — 1 run from March 31, role not confirmed",
-    owner: "simfi-mebel-ai",
-  },
 };

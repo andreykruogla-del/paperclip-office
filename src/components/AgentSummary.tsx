@@ -81,10 +81,14 @@ export default function AgentSummary({
         {timeAgo(Date.now() - agent.lastSeen)}
       </span>
 
-      {/* Description — subtle */}
-      {profile.description && (
-        <span className="text-zinc-600 truncate max-w-48 italic" title={profile.description}>
+      {/* Description or unmapped hint */}
+      {profile.description ? (
+        <span className="text-zinc-600 truncate max-w-48 italic shrink-0" title={profile.description}>
           {profile.description}
+        </span>
+      ) : profile.role === "unknown" && (
+        <span className="text-zinc-700 shrink-0" title="Add profile in src/data/agent-profiles.local.ts">
+          (unmapped)
         </span>
       )}
 

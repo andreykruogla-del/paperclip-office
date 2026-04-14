@@ -80,15 +80,19 @@ export default function RunView({
             <span className="ml-2 text-xs text-zinc-200 dark:text-zinc-300 font-medium">
               {agentProfile.displayName}
             </span>
-            <span className="ml-1.5 text-xs text-zinc-500">
+            <span className="ml-1.5 text-xs font-mono text-zinc-500" title={firstEvent.agentId}>
               {getAgentShortId(firstEvent.agentId)}
             </span>
             <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded ${runtimeBadge[agentProfile.runtime] ?? runtimeBadge.unknown}`}>
               {agentProfile.runtime}
             </span>
-            {agentProfile.description && (
-              <span className="ml-2 text-xs text-zinc-500 italic truncate max-w-48">
+            {agentProfile.description ? (
+              <span className="ml-2 text-xs text-zinc-500 italic truncate max-w-48" title={agentProfile.description}>
                 {agentProfile.description}
+              </span>
+            ) : agentProfile.role === "unknown" && (
+              <span className="ml-2 text-xs text-zinc-600" title="Add a profile in src/data/agent-profiles.local.ts">
+                (unmapped)
               </span>
             )}
           </div>
