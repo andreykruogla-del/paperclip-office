@@ -103,6 +103,7 @@ After `npm run dev`:
 |---|---|---|
 | `better-sqlite3` build fails | Missing native build tools | Install Python 3 + C++ compiler, then `npm rebuild` |
 | `import:paperclip` fails / "no logs found" | Paperclip not running or container name mismatch | Check `docker ps`, ensure `paperclip-paperclip-1` is running |
+| `import:paperclip` shows `Runs imported: 0` but no error | Log format mismatch — parser couldn't parse the NDJSON | Check diagnostic output for "Drop reasons". Verify Paperclip version. Open an issue with a sample log line. |
 | Port 3000 already in use | Another process bound to 3000 | Set `PORT=3001 npm run dev` |
 | Demo mode shows wrong data | Stale SQLite DB | Delete `paperclip-office.db` and re-run import |
 | Live mode shows `Agent abc12345` | Real agents not yet mapped | Click short ID → copy UUID → add to `src/data/agent-profiles.local.ts` |

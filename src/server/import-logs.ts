@@ -14,6 +14,12 @@ export type ImportResult = {
   eventsImported: number;
   completedRuns: number;
   failedRuns: number;
+  diagnostics?: {
+    linesRead: number;
+    eventsParsed: number;
+    linesDropped: number;
+    dropReasons: Record<string, number>;
+  };
   error?: string;
   timestamp: number;
 };
@@ -44,6 +50,7 @@ export function importAllLogs(): ImportResult {
     eventsImported: importedEvents,
     completedRuns,
     failedRuns,
+    diagnostics: debug._diagnostics,
     timestamp: Date.now(),
   };
 }

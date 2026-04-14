@@ -43,6 +43,12 @@ export type ParserDebugInfo = {
   totalRuns: number;
   totalEvents: number;
   unparsedCount: number;
+  _diagnostics?: {
+    linesRead: number;
+    eventsParsed: number;
+    linesDropped: number;
+    dropReasons: Record<string, number>;
+  };
 };
 
 export type LogAnalysis = {
