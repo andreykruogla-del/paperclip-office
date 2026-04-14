@@ -25,19 +25,19 @@ Record of key architectural and product decisions with rationale.
 - **Decision**: Use SQLite as the default database
 - **Rationale**: Zero-config, self-hosted friendly, sufficient for single-tenant MVP. Pluggable to PostgreSQL later for SaaS phase
 - **Date**: 2026-04-10
-- **Status**: Planned
+- **Status**: ✅ Implemented
 
 ### 4. Monolith architecture (no separate backend)
 
 - **Decision**: Keep frontend and backend in one Next.js app
 - **Rationale**: Minimizes deployment complexity for MVP. Can extract later if needed
 - **Date**: 2026-04-10
-- **Status**: Planned
+- **Status**: ✅ Implemented
 
 ### 5. OSS-first, self-hosted product
 
-- **Decision**: Core dashboard is open-source and fully self-hostable
-- **Rationale**: Builds trust, community, and adoption. SaaS adds value on top (hosting, history, alerts, teams) rather than gating core features
+- **Decision**: Core product is open-source and fully self-hostable
+- **Rationale**: Builds trust, community, and adoption. Future SaaS adds value on top (hosting, history, alerts, teams) rather than gating core features
 - **Date**: 2026-04-10
 - **Status**: Guiding principle
 
@@ -95,7 +95,7 @@ Record of key architectural and product decisions with rationale.
   - Re-import is safe (ON CONFLICT / INSERT OR IGNORE)
   - DB file is gitignored — no shared state
 - **Date**: 2026-04-10
-- **Status**: Implemented
+- **Status**: ✅ Implemented
 
 ### 12. Real agent identities grounded in remote evidence
 
@@ -109,7 +109,7 @@ Record of key architectural and product decisions with rationale.
   - New teams require manual profile entries after inspecting their logs
   - Unknown agents remain visible but visually subordinate to known team members
 - **Date**: 2026-04-10
-- **Status**: Implemented
+- **Status**: ✅ Implemented
 
 ### 13. Polling-based refresh before true streaming
 
@@ -124,7 +124,7 @@ Record of key architectural and product decisions with rationale.
   - Server load from periodic Docker reads
   - Acceptable trade-off for Phase 0 — streaming comes when we have real operator feedback
 - **Date**: 2026-04-10
-- **Status**: Implemented
+- **Status**: ✅ Implemented
 
 ### 14. Paperclip Office is an operations map + run forensics product
 
@@ -153,7 +153,7 @@ Record of key architectural and product decisions with rationale.
   - Clickable short ID copies full UUID for profile mapping
   - Manual mapping via `src/data/agent-profiles.local.ts` is the practical workflow
 - **Date**: 2026-04-10
-- **Status**: Implemented
+- **Status**: ✅ Implemented
 
 ### 16. 50/50 vertical split as main screen baseline
 
@@ -167,4 +167,73 @@ Record of key architectural and product decisions with rationale.
   - Investigation area always has sufficient space
   - Neither section can steal height from the other
 - **Date**: 2026-04-10
-- **Status**: Implemented
+- **Status**: ✅ Implemented
+
+### 17. Operator clarity over cozy/decorative office aesthetics
+
+- **Decision**: Visual identity = operator-grade clarity, not cozy office aesthetics, pixel art, animated workers, or decorative fantasy
+- **Why**:
+  - The market rapidly commoditizes "visual agent office" as a decorative shell
+  - Paperclip Office's differentiation is in failure investigation, not in how cute the interface looks
+  - Operators under stress need signal, not decoration
+- **Consequence**:
+  - No room editors, no desktop pet agents, no animated worker visualizations
+  - Visual design serves investigation speed and accuracy
+  - Future moat is in failure localization, propagation, and evidence — not in UI decoration
+- **Date**: 2026-04-10
+- **Status**: Guiding principle
+
+### 18. Paperclip Office is not a control-plane clone
+
+- **Decision**: We observe and investigate; we do not orchestrate, schedule, or manage permissions
+- **Why**:
+  - Paperclip already handles execution control
+  - Building a competing orchestrator would dilute our focus and create redundant tooling
+  - The real operator gap is in understanding *what happened and why*, not in executing it
+- **Consequence**:
+  - No agent scheduling, no task assignment, no permission management
+  - Focus stays on observability, investigation, and operator attention
+  - Future differentiation comes from failure propagation and evidence, not from control features
+- **Date**: 2026-04-10
+- **Status**: Guiding principle
+
+### 19. Failure localization as future product moat
+
+- **Decision**: The strongest future differentiation will come from understanding where a multi-agent system broke, how the failure propagated, and what evidence supports the diagnosis — not from visual office aesthetics
+- **Why**:
+  - Visual office shells are easily replicated and commoditized
+  - Deep failure investigation is hard, operator-valuable, and defensible
+  - This aligns with real operator needs: "where is the problem and why"
+- **Consequence**:
+  - Future investment prioritizes handoff chains, cross-run correlation, failure propagation, and evidence packets
+  - Visual polish is secondary to investigative depth
+  - README and positioning should reflect investigation value, not decorative value
+- **Date**: 2026-04-10
+- **Status**: Guiding principle
+
+### 20. Agent-consumable observability is a working hypothesis
+
+- **Decision**: Paperclip Office may later provide structured observability context for both human operators and assisting agents, but this remains a hypothesis — not a pivot, not current product identity
+- **Why**:
+  - If agents assist human operators in investigation, they need the same structured context
+  - However, building for agent consumption now would be premature speculation
+- **Consequence**:
+  - Product stays human-operator-first
+  - Future observability layer may be designed to serve both humans and agents
+  - Not mentioned in README as a current feature or near-term promise
+- **Date**: 2026-04-10
+- **Status**: Working hypothesis
+
+### 21. Copilot is assistive-only, not a current build priority
+
+- **Decision**: If built, copilot will be advisory only — summaries, likely root-cause hints, suggested next checks — never autonomous execution or control
+- **Why**:
+  - Autonomous agent systems are a different product category
+  - Operators need tools they trust and control, not systems that act without permission
+  - Current priority is investigative surfaces, not AI assistance
+- **Consequence**:
+  - Copilot (if any) is placed in Later/Hypotheses, not in Next
+  - No autonomous execution, no control plane, no "AI runs the system"
+  - Copilot is never mentioned as a current or near-term feature
+- **Date**: 2026-04-10
+- **Status**: Later direction

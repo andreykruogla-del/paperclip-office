@@ -2,9 +2,14 @@
 
 ## What Paperclip Office Is
 
-Paperclip Office is a visual operations map and forensic run debugger for Paperclip multi-agent teams.
+Paperclip Office is an **operator-grade operations map and forensic run debugger** for Paperclip multi-agent teams.
 
 It is an **observer and investigator**, not an orchestrator. It helps operators understand team state and investigate failures — it does not run agents, schedule tasks, or manage permissions.
+
+Its core value is answering two questions:
+
+1. **"Who needs my attention right now?"**
+2. **"Why did this specific run fail?"**
 
 ## Current Stance
 
@@ -20,11 +25,12 @@ External value now depends on operator readability and investigation usefulness,
 
 ## What Paperclip Office Is Not
 
-- Not a replacement for Paperclip
-- Not a governance or control-plane clone
-- Not a generic dashboard for all monitoring needs
-- Not an autonomous agent system
-- Not a fake identity generator — unknown agents are shown honestly
+- **Not a replacement for Paperclip** — it observes and investigates, does not orchestrate
+- **Not a decorative agent office** — no pixel art, cozy aesthetics, animated workers, or room editors
+- **Not a generic metrics dashboard** — it solves one specific problem: operator attention and failure localization
+- **Not an autonomous agent system** — it does not execute, it surfaces
+- **Not a governance or control-plane clone** — no scheduling, permissions, or task assignment
+- **Not a SaaS now** — local-first, self-hosted, validated before hosted
 
 ## How It Complements Paperclip
 
@@ -52,6 +58,19 @@ Operators of multi-agent systems face two fundamental questions:
 
 Neither question can be answered cleanly by Paperclip's native interface alone, because Paperclip is built for execution, not observation. Paperclip Office fills this gap.
 
+## Future Differentiation: Failure Investigation, Not Visual Decoration
+
+The market rapidly commoditizes "visual agent office" as a decorative shell. Paperclip Office's differentiation is in **failure investigation depth**, not in how the interface looks.
+
+The future moat lies in:
+
+- **Handoff-aware investigation** — seeing the chain of work transfers, not just isolated runs
+- **Failure propagation** — understanding where the circuit broke and what downstream effects followed
+- **Cross-run correlation** — recognizing patterns, not just individual failures
+- **Evidence assembly** — packaging runs, agents, errors, and raw data into an investigation packet
+
+These are future directions, not current implementation promises.
+
 ## Why Plugin / Distribution Path Matters
 
 Paperclip Office is currently a standalone local-first application. This is intentional — it keeps development simple and validates the product shape before adding deployment complexity.
@@ -63,6 +82,12 @@ In the future, Paperclip Office could distribute as:
 - A hosted service for teams that don't want to self-host
 
 The plugin path is particularly important because it would make Paperclip Office a natural extension of Paperclip rather than a separate tool. This is a future direction, not a current implementation.
+
+## Working Hypothesis: Shared Observability Context
+
+Paperclip Office may later become useful not only to human operators, but also to assisting agents, as a structured observability context layer.
+
+This is a **working hypothesis**, not a pivot, not current product identity. The product remains operator-first.
 
 ## Why Current Standalone Local-First Form Is a Bridge Step
 
