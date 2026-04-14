@@ -17,7 +17,6 @@ export type ImportResult = {
   diagnostics?: {
     linesRead: number;
     eventsParsed: number;
-    linesDropped: number;
     dropReasons: Record<string, number>;
   };
   error?: string;

@@ -16,7 +16,6 @@ if (result.diagnostics) {
   console.log(`\n--- Diagnostics ---`);
   console.log(`Lines read:      ${d.linesRead}`);
   console.log(`Events parsed:   ${d.eventsParsed}`);
-  console.log(`Lines dropped:   ${d.linesDropped}`);
   if (Object.keys(d.dropReasons).length > 0) {
     console.log(`Drop reasons:`);
     for (const [reason, count] of Object.entries(d.dropReasons)) {

@@ -157,7 +157,7 @@ export function readPaperclipLogs(): LogAnalysis {
   // Clean up temp files
   try { rmSync(tmpDir, { recursive: true, force: true }); } catch { /* ignore */ }
 
-  const linesDropped = linesRead - eventsParsed;
+  const dropReasonsObj = Object.fromEntries([...dropReasons.entries()].sort((a, b) => b[1] - a[1]));
 
   return {
     events,
@@ -166,12 +166,11 @@ export function readPaperclipLogs(): LogAnalysis {
       parserVersion: PARSER_VERSION,
       totalRuns: runs.size,
       totalEvents: events.length,
-      unparsedCount: linesDropped,
+      unparsedCount: dropReasonsObj.bad_chunk ?? 0,
       _diagnostics: {
         linesRead,
         eventsParsed,
-        linesDropped,
-        dropReasons: Object.fromEntries([...dropReasons.entries()].sort((a, b) => b[1] - a[1])),
+        dropReasons: dropReasonsObj,
       },
     },
   };
