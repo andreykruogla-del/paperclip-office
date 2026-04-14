@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { LogEvent } from "@/types/events";
 import { getAgentProfile, getAgentShortId } from "@/lib/agent-profiles";
 
@@ -58,6 +59,13 @@ export default function RunView({
   const isFailed = resultEvent?.normalizedType === "result_error";
   const errorMessage = resultEvent?.error;
   const agentProfile = getAgentProfile(firstEvent.agentId);
+  const [copied, setCopied] = useState(false);
+
+  const copyAgentId = () => {
+    navigator.clipboard.writeText(firstEvent.agentId);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
 
   const runtimeBadge: Record<string, string> = {
     paperclip: "bg-blue-500/15 text-blue-300/80",
@@ -80,9 +88,19 @@ export default function RunView({
             <span className="ml-2 text-xs text-zinc-200 dark:text-zinc-300 font-medium">
               {agentProfile.displayName}
             </span>
-            <span className="ml-1.5 text-xs font-mono text-zinc-500" title={firstEvent.agentId}>
-              {getAgentShortId(firstEvent.agentId)}
-            </span>
+            {agentProfile.role === "unknown" ? (
+              <button
+                onClick={copyAgentId}
+                className="ml-1.5 text-xs font-mono text-zinc-500 hover:text-zinc-300 cursor-pointer transition-colors"
+                title={copied ? "Copied!" : "Click to copy full UUID"}
+              >
+                {copied ? "copied!" : getAgentShortId(firstEvent.agentId)}
+              </button>
+            ) : (
+              <span className="ml-1.5 text-xs font-mono text-zinc-500" title={firstEvent.agentId}>
+                {getAgentShortId(firstEvent.agentId)}
+              </span>
+            )}
             <span className={`ml-1.5 text-xs px-1.5 py-0.5 rounded ${runtimeBadge[agentProfile.runtime] ?? runtimeBadge.unknown}`}>
               {agentProfile.runtime}
             </span>
