@@ -29,6 +29,19 @@ The product already provides real investigative value on live Paperclip data.
 
 ---
 
+## Phase 1.5 — First-Run Reliability (Current Focus)
+
+**Goal**: Make the first external launch deterministic, reproducible, and confusion-free.
+
+- [ ] Live-first onboarding clarity (demo is explicitly secondary)
+- [ ] Prerequisites & environment check guide
+- [ ] Troubleshooting table for common setup failures
+- [ ] Clear first-success criteria (what to look for, what it means)
+- [ ] Stabilize `import:paperclip` across different container setups
+- [ ] Lower support cost for first-time operators
+
+---
+
 ## Next — Near-Term Direction
 
 **Goal**: Improve investigation depth and operator readability on noisy real datasets
