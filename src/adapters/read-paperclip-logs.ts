@@ -70,8 +70,36 @@ export function readPaperclipLogs(): LogAnalysis {
           continue;
         }
 
-        // Decode the chunk string
-        const decoded = JSON.parse(chunkStr) as unknown;
+        // Decode the chunk string — it may contain real newlines with multiple JSON objects
+        let decoded: unknown;
+        try {
+          decoded = JSON.parse(chunkStr);
+        } catch {
+          // chunkStr has real newlines with multiple JSON objects (real Paperclip format)
+          if (chunkStr.trim().startsWith("{")) {
+            const subLines = chunkStr.split("\n");
+            for (const subLine of subLines) {
+              if (!subLine.trim()) continue;
+              try {
+                const obj = JSON.parse(subLine) as Record<string, unknown>;
+                const event = makeEvent(obj, ts, agentId, runId);
+                if (event) {
+                  events.push(event);
+                  eventsParsed++;
+                  if (!runs.has(runId)) runs.set(runId, []);
+                  runs.get(runId)!.push(event);
+                } else {
+                  dropReasons.set("no_mapping", (dropReasons.get("no_mapping") || 0) + 1);
+                }
+              } catch {
+                dropReasons.set("bad_json", (dropReasons.get("bad_json") || 0) + 1);
+              }
+            }
+            continue;
+          }
+          dropReasons.set("bad_chunk", (dropReasons.get("bad_chunk") || 0) + 1);
+          continue;
+        }
 
         // Case 1: decoded is already a JSON object (sample format)
         if (typeof decoded === "object" && decoded !== null && !Array.isArray(decoded)) {
