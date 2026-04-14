@@ -1,4 +1,7 @@
 import { execSync } from "node:child_process";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { readFileSync, rmSync, mkdirSync, existsSync } from "node:fs";
 import type { LogEvent, LogAnalysis, NormalizedEventType } from "@/types/events";
 
 const LOG_BASE = "/paperclip/instances/default/data/run-logs";
@@ -22,7 +25,25 @@ export function readPaperclipLogs(): LogAnalysis {
   );
   const files = fileList.trim().split("\n").filter(Boolean);
 
-  // Step 2: Read each file individually (avoids shell variable escaping issues on Linux)
+  // Step 2: Create a temp dir and copy files locally (avoids PTY line-wrapping issues on SSH)
+  const tmpDir = join(tmpdir(), `paperclip-logs-${Date.now()}`);
+  mkdirSync(tmpDir, { recursive: true });
+
+  for (const filePath of files) {
+    // Create subdirectory structure locally
+    const relPath = filePath.replace(LOG_BASE + "/", "");
+    const localPath = join(tmpDir, relPath);
+    const localDir = localPath.substring(0, localPath.lastIndexOf("/"));
+    mkdirSync(localDir, { recursive: true });
+
+    // Use docker cp to avoid PTY line wrapping
+    execSync(
+      `docker cp paperclip-paperclip-1:"${filePath}" "${localPath}"`,
+      { encoding: "utf-8" }
+    );
+  }
+
+  // Step 3: Read files from local temp dir
   const events: LogEvent[] = [];
   const runs = new Map<string, LogEvent[]>();
   let linesRead = 0;
@@ -31,10 +52,9 @@ export function readPaperclipLogs(): LogAnalysis {
 
   for (const filePath of files) {
     const { agentId, runId } = parsePath(filePath);
-    const content = execSync(
-      `docker exec paperclip-paperclip-1 cat '${filePath}'`,
-      { encoding: "utf-8", maxBuffer: 100 * 1024 * 1024 }
-    );
+    const relPath = filePath.replace(LOG_BASE + "/", "");
+    const localPath = join(tmpDir, relPath);
+    const content = readFileSync(localPath, "utf-8");
 
     for (const line of content.split("\n")) {
       if (!line.trim()) continue;
@@ -105,6 +125,9 @@ export function readPaperclipLogs(): LogAnalysis {
   }
 
   events.sort((a, b) => a.timestamp - b.timestamp);
+
+  // Clean up temp files
+  try { rmSync(tmpDir, { recursive: true, force: true }); } catch { /* ignore */ }
 
   const linesDropped = linesRead - eventsParsed;
 
