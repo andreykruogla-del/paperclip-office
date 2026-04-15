@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "vitest run",
+    "doctor:live": "npx tsx scripts/doctor-live.ts",
     "import:paperclip": "npx tsx scripts/import-paperclip-logs.ts",
     "import:sample": "npx tsx scripts/import-sample.ts",
     "send:events": "node scripts/send-test-events.js",

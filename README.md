@@ -52,7 +52,15 @@ Then choose one of the two paths below.
 
 Paperclip Office reads real Paperclip run-logs to build the operations map. It does not auto-discover running agents; you must point it to your Paperclip data.
 
-### 1. Import real logs
+### 1. Check readiness
+
+```bash
+npm run doctor:live
+```
+
+This verifies Docker CLI, the Paperclip container, and log path accessibility. Fix any issues before importing.
+
+### 2. Import real logs
 
 ```bash
 npm run import:paperclip
@@ -65,7 +73,7 @@ npm run import:paperclip
 - Container name must be `paperclip-paperclip-1` (or update the script)
 - You must have Docker CLI access
 
-### 2. Start the app
+### 3. Start the app
 
 ```bash
 npm run dev
