@@ -38,17 +38,21 @@ node -v  # Expected: v20.x.x or higher
 npm -v   # Expected: 9.x.x or higher
 ```
 
+## Install
+
+```bash
+git clone https://github.com/andreykruogla-del/paperclip-office.git
+cd paperclip-office
+npm install
+```
+
+Then choose one of the two paths below.
+
 ## Quick Start: Live Mode (Recommended for real usage)
 
 Paperclip Office reads real Paperclip run-logs to build the operations map. It does not auto-discover running agents; you must point it to your Paperclip data.
 
-### 1. Install dependencies
-
-```bash
-npm install
-```
-
-### 2. Import real logs
+### 1. Import real logs
 
 ```bash
 npm run import:paperclip
@@ -61,7 +65,7 @@ npm run import:paperclip
 - Container name must be `paperclip-paperclip-1` (or update the script)
 - You must have Docker CLI access
 
-### 3. Start the app
+### 2. Start the app
 
 ```bash
 npm run dev
@@ -76,8 +80,7 @@ Open `http://localhost:3000`. You will see your real agents. Unknown agents will
 Use this only to quickly preview the UI without a real Paperclip instance. **Not for production or real investigation.**
 
 ```bash
-npm install
-npm run import:sample  # Loads 11 synthetic sample runs
+npm run import:sample
 npm run dev
 ```
 
